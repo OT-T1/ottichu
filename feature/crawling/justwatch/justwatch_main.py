@@ -2,7 +2,6 @@
 
 from selenium import webdriver
 import time
-import justwatch
 import csv
 import pickle
 
