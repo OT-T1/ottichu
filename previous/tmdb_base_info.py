@@ -2,26 +2,37 @@ import requests
 import json
 import time
 import random
+import justwatch
 
+
+# 헤더 정보가 없으면 에러가 나는 경우가 있어서 미리 넣었습니다.
+headers = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36'}
 
 # 크롤링을 위한 API KEY
 API_KEY = 'aaeb39f3d7b1e153106013ce39c952af'
 
+
 # TMDB에서는 영화 id가 숫자로 되어 있으므로 for문을 돌면서 영화 정보를 모두 수집합니다.
 temp = dict()
 
-# id값을 start에서 end만큼 돌며 api에서 제공하는 영화 메타데이터를 수집합니다.
-start = 7001
-end = 8001
-for i in range(start,end):
+# 현재는 550번 = 파이트 클럽만 수집해오는 상태입니다.
+for i in range(550,551):
     # TMDB api 이용하기
     api_data = requests.get(f'https://api.themoviedb.org/3/movie/{i}?api_key={API_KEY}&language=ko-KR').json()
     # 크롤링 Block을 막기 위해 시간 차 두기
-    time.sleep(random.uniform(0.5, 1.5))
+    time.sleep(random.uniform(0.5, 3))
    
-    try:  
+    try:
+        # Just Watch와 데이터 합치기
+        # %EC%98%81%ED%99%94 = 영화 (아스키코드)
+        # OTT 데이터 가져오기
+        just_title = api_data['original_title'].replace(' ','-')
+        JUST_PATH = f'https://www.justwatch.com/kr/%EC%98%81%ED%99%94/{just_title}'
+        ott = justwatch.get_ott(JUST_PATH)
+        
         temp[i] = {
             "title": api_data['title'], # 한국어 제목
+            "ott": ott, # ott data from justwatch.py
             "original_title" : api_data['original_title'], # 영화/TV 쇼 원제
             "original_language" : api_data['original_language'], # 원래 제공되는 언어
             "imdb_id" : api_data['imdb_id'], # IMDB id
@@ -38,17 +49,26 @@ for i in range(start,end):
     except:
         pass
 
-file_path = f'./TMDB_base_info_{start}_{end-1}.json'
+file_path = './TMDB_base_info.json'
 
 # 최초 파일 작성용
 with open(file_path, 'w') as outfile:
     json.dump(temp, outfile, indent=4, ensure_ascii = False)
 
+# # 덮어쓰기 위해 기존 파일 불러오기
+# with open(file_path, 'r') as json_file:
+#     json_data = json.load(json_file)
+
+# # 덮어쓰기
+# with open(file_path, 'w') as outfile:
+#     json_data.update(temp)
+#     json.dump(json_data, outfile, indent=4, ensure_ascii = False)
+
 
 # 저장된 파일 불러와서 확인하기
-# with open(file_path, 'r') as json_file:
-#     json_data2 = json.load(json_file)
-#     print(json_data2)
+with open(file_path, 'r') as json_file:
+    json_data2 = json.load(json_file)
+    print(json_data2)
 
 
 
