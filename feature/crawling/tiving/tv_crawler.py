@@ -75,18 +75,18 @@ class TVCrawler:
 
   def __put_content_data(self, category, content):
     template_data = {
-      'ott': OTT_PROVIDERS,
+      'ott': {OTT_PROVIDERS: ['정액제'] if category == 'program' else [['정액제', '구매'][content['free_yn'] == 'Y']]},
       'title': content['name']['ko'],
       'original_title': content['name']['en'] if content['name']['en'] else '',
-      'category': 'tvshow' if category == 'program' else 'movie',
-      'country': content['product_country'],
+      'category': 'TV 프로그램' if category == 'program' else '영화',
+      'country': [], # [content['product_country']],
       'genre': [content['category1_name']['ko'], content['category2_name']['ko']],
       'director': content['director'],
       'actors': content['actor'],
       'released_year': content['product_year'],
-      'runtime': float(0),
-      'summary': content['synopsis']['ko'] if category == 'program' else content['story']['ko'],
-      'rating': content['rating'] if 'rating' in content else 0,
+      'runtime': 0,
+      'summary': content['synopsis']['ko'].replace('\r\n', '') if category == 'program' else content['story']['ko'].replace('\r\n', ''),
+      'rating': float(content['rating'] if 'rating' in content else 0),
       # 'rating_meta':,
       # 'poster_url':,
     }

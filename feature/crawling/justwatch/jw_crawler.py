@@ -1,89 +1,32 @@
 import time
 import json
 import requests
+from constants import \
+  BASE_URL, \
+  HEADERS, \
+  CONTENTS_SUMMARY_URL, \
+  CONTENT_DETAIL_URL, \
+  ESSENTIAL_ITEMS, \
+  DEFAULT_FIELDS, \
+  VALID_PARAMS, \
+  VALID_FIELDS, \
+  VALID_PROVIDERS, \
+  VALID_CONTENT_TYPE, \
+  REQUIRED_LIST, \
+  ON_OFF_ITEM, \
+  OTT_NAME, \
+  OTT_TYPE, \
+  GENRE_CODE, \
+  COUNTRY
+from collections import defaultdict
 
 OTT_PROVIDERS = ['nfx', 'wav', 'wac']
-START_YEAR = 1916
-END_YEAR = 2021
-YEAR_CNT = 0
+START_YEAR = 1916 #1916
+END_YEAR = 1916 #2021
+YEAR_CNT = 1
 
 RETRY_CNT = 3
 RETRY_DELAY = 3
-
-BASE_URL = 'https://apis.justwatch.com/content/titles'
-HEADERS = {
-  'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36'
-}
-REQUEST_TYPE = {
-  'contents_summary': 0,
-  'content_detail': 1
-}
-CONTENTS_SUMMARY_URL = '/ko_KR/popular'
-CONTENT_DETAIL_URL = lambda ctgry, id: f'{ctgry}/{id}/locale/ko_KR?language=ko'
-
-ESSENTIAL_ITEMS = {
-  'fields',
-  'page',
-  'page_size'
-  #'enable_provider_filter':false,
-  #'is_upcoming':false,
-  #'matching_offers_only':true
-}
-DEFAULT_FIELDS = '["id","localized_release_date","object_type","poster","scoring","title","tmdb_popularity","production_countries","offers","original_release_year"]'
-VALID_PARAMS = {
-  'fields',
-  'content_types',
-  'providers',
-  'release_year_from',
-  'release_year_until',
-  'enable_provider_filter',
-  'is_upcoming',
-  'monetization_types',
-  'page',
-  'page_size',
-  'matching_offers_only'
-}
-VALID_FIELDS = {
-  'id',
-  'localized_release_date',
-  'object_type',
-  'poster',
-  'scoring',
-  'title',
-  'tmdb_popularity',
-  'production_countries',
-  'offers',
-  'original_release_year',
-}
-VALID_PROVIDERS = {
-  'nfx',
-  'wav',
-  'wac',
-  # ... 추가 가능
-}
-VALID_CONTENT_TYPE = { 'movie', 'show' }
-ON_OFF_ITEM = {
-  'enable_provider_filter',
-  'is_upcoming',
-  'matching_offers_only',
-}
-
-REQUIRED_DATA = {
-  'id',
-  'title',
-  'original_title',
-  'original_release_year',
-  'tmdb_popularity',
-  'object_type',
-  'offers',
-  'scoring',
-  'production_countries',
-  'short_description',
-  'credits',
-  'genre_ids',
-  'runtime',
-  'production_countries',  
-}
 
 
 class JWCrawler:
@@ -92,17 +35,22 @@ class JWCrawler:
     self.url = ''
     self.total_pages = 21
     self.contents_cnt = 0
+    self.actual_cnt = 0
     self.collected_data = {}
     self.err_list = []
+    self.country = set()
 
   def init_total_pages(self):
     self.total_pages = 21
+    
+  def clear_collection(self):
+    self.collected_data = {}
     
   def get_data(self):
     return self.collected_data
   
   def get_data_cnt(self):
-    return len(self.collected_data.keys())
+    return self.actual_cnt
 
   def __parse_item(self, values, valid_values):
     result = ''
@@ -164,20 +112,72 @@ class JWCrawler:
     return {'res': response.text, 'err': False}
   
   def __get_content_data(self, id, category):
-    self.set_url(f'/{category}/{id}/locale/ko_KR?language=ko')
+    self.set_url(CONTENT_DETAIL_URL(category, id))
     response = self.__request_ott_data(1)['res']
     if not response:
       return {}
     return json.loads(response, encoding='utf-8')
+  
+  def __put_content_data(self, content):
+    if not content:
+      return
     
+    items = {}
+    exist = set(content.keys())
+    for item in REQUIRED_LIST:
+      items[item] = content[item] if item in exist else ''
+      if item == 'object_type' and items['object_type']:
+        items['object_type'] = ['TV 프로그램', '영화'][items['object_type'] == 'movie']
+
+    otts = defaultdict(set)
+    for ofr in items['offers']:
+      if ofr['provider_id'] in OTT_NAME:
+        otts[OTT_NAME[ofr['provider_id']]] \
+          .add(OTT_TYPE[ofr['monetization_type']])
+    
+    # 딥버깅
+    for cntry in items['production_countries']:
+      self.country.add(cntry)
+
+    directors, actors = [], []
+    for person in items['credits']:
+      if person['role'] == 'DIRECTOR':
+        directors.append(person['name'])
+      elif person['role'] == 'ACTOR':
+        actors.append(person['name'])
+
+    calc_avg = lambda x: round(sum(x) / len(x), 1) if x else float(0)
+    get_scores = lambda scores: [scr['value'] for scr in scores if scr['provider_type'].endswith(':score')]
+
+    # show movie
+    template_data = {
+      'ott': {name : list(mtype) for name, mtype in otts.items()},
+      'title': items['title'],
+      'original_title': items['original_title'],
+      'category': items['object_type'],
+      'country': [COUNTRY[cntry] for cntry in items['production_countries'] if cntry in COUNTRY],
+      'genre': [GENRE_CODE[id] for id in items['genre_ids']],
+      'director': directors,
+      'actors': actors,
+      'released_year': items['original_release_year'],
+      'runtime': items['runtime'],
+      'summary': items['short_description'],
+      'rating': calc_avg(get_scores(items['scoring'])),
+      # 'rating_meta':,
+      # 'poster_url':,
+    }
+    self.collected_data[content['id']] = template_data
+    self.actual_cnt += 1
+
 
   def get_ott_data(self):
     response = self.__request_ott_data(1)['res']
     if not response:
       return self
     to_dict = json.loads(response, encoding='utf-8')
-    self.total_pages = to_dict['total_pages'] if to_dict['items'] else 21
+    self.total_pages = to_dict['total_pages'] if to_dict['items'] else self.total_pages
     self.contents_cnt += len(to_dict['items'])
+    # print(len(to_dict['items']), self.contents_cnt) # 디버깅
 
     # Get content list
     ids = {}
@@ -191,9 +191,7 @@ class JWCrawler:
     # Get detail data of content
     for id, ctgry in ids.items():
       content = self.__get_content_data(id, ctgry)
-      for item, value in content.items():
-        if item in REQUIRED_DATA:
-          self.collected_data[id][item] = value
+      self.__put_content_data(content)
     return self
   
   def print_collected_data(self):
@@ -221,7 +219,6 @@ def set_year_filter(start, end, include_cnt):
   elif YEAR_CNT > 1:
     from_year = range(start, end + 1, include_cnt)
     to_year = range(start + 1, end + 2, include_cnt)
-
   return zip(from_year, to_year)
 
 
@@ -240,6 +237,7 @@ if __name__ == '__main__':
   crawler = JWCrawler(BASE_URL)
   try:
     for start, end in set_year_filter(START_YEAR, END_YEAR, YEAR_CNT):
+      print("개봉 연도:", start, end)
       for category in ['movie', 'show']:
         for i in range(1, 21):
           if i > crawler.total_pages:
@@ -254,11 +252,14 @@ if __name__ == '__main__':
               'release_year_until': end
             }) \
             .get_ott_data() \
-            .print_error() \
+            # .print_error() \
             # .print_collected_data()
         crawler.init_total_pages()
     else:
+      print(f'전체 국가 코드: {crawler.country}')
       print(f'전체 데이터 개수: {crawler.get_data_cnt()}')
+      print(f'에러 개수: {len(crawler.err_list)}')
+      print(f'에러 목록: {crawler.err_list}')
       create_dataset('json', crawler.get_data())
   except Exception as e:
     print(f'"Error Message": {e}')
