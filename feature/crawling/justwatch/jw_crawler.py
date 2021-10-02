@@ -1,3 +1,4 @@
+import re
 import time
 import json
 import requests
@@ -161,7 +162,7 @@ class JWCrawler:
       'actors': actors,
       'released_year': items['original_release_year'],
       'runtime': items['runtime'],
-      'summary': items['short_description'],
+      'summary': re.sub('\r|\n', '', items['short_description']),
       'rating': calc_avg(get_scores(items['scoring'])),
       # 'rating_meta':,
       # 'poster_url':,
