@@ -29,37 +29,6 @@ QUERY_PARAMS = lambda x, y: {
 RETRY_CNT = 3
 RETRY_DELAY = 3
 
-REQUIRED_DATA = {
-  # TV Show
-  'name',
-  'category1_name',
-  'category2_name',
-  'product_year',
-  'product_country',
-  'production',
-  'director',
-  'actor',
-  'synopsis',
-  'story',
-  'adult_yn',
-  'fan_yn',
-  # Movie
-  'free_yn',
-  'original_cp',
-  'price',
-  'hd_yn',
-  'quality',
-  'rating',
-  'story',
-  'diversity_yn',
-  'non_drm_yn',
-  'tving_original_yn',
-  'tving_exclusive_yn',
-  'billing_package_tag',
-  'drm_4k_yn',
-  'hdr_type'
-}
-
 # movie , max_page_size = 451, pages = 8, total_cnt = 3608
 # tv program, max_page_size = 451, pages = 8, total_cnt = 2255
 
@@ -104,20 +73,36 @@ class TVCrawler:
       return {'res': None, 'err': False}
     return {'res': to_dict['body']['result'], 'err': False}
 
+  def __put_content_data(self, category, content):
+    template_data = {
+      'ott': OTT_PROVIDERS,
+      'title': content['name']['ko'],
+      'original_title': content['name']['en'] if content['name']['en'] else '',
+      'category': 'tvshow' if category == 'program' else 'movie',
+      'country': content['product_country'],
+      'genre': [content['category1_name']['ko'], content['category2_name']['ko']],
+      'director': content['director'],
+      'actors': content['actor'],
+      'released_year': content['product_year'],
+      'runtime': float(0),
+      'summary': content['synopsis']['ko'] if category == 'program' else content['story']['ko'],
+      'rating': content['rating'] if 'rating' in content else 0,
+      # 'rating_meta':,
+      # 'poster_url':,
+    }
+    self.collected_data[content['code']] = template_data
+
   def get_contents_data(self):
     reponse = self.__request_contents_data(RETRY_CNT)['res']
     if not reponse:
       return self
     
     self.contents_cnt += len(reponse)
-    for content in reponse:
-      for ctgry, data in content.items():
-        if ctgry not in { 'program', 'movie' } or not data:
+    for data in reponse:
+      for ctgry, content in data.items():
+        if ctgry not in { 'program', 'movie' } or not content:
           continue
-        self.collected_data[data['code']] = {}
-        for item, value in data.items():
-          if item in REQUIRED_DATA:
-            self.collected_data[data['code']][item] = value
+        self.__put_content_data(ctgry, content)
     return self
 
   def print_collected_data(self):
