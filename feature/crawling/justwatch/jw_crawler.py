@@ -21,9 +21,9 @@ from constants import \
 from collections import defaultdict
 
 OTT_PROVIDERS = ['nfx', 'wav', 'wac']
-START_YEAR = 1916 #1916
-END_YEAR = 1916 #2021
-YEAR_CNT = 1
+START_YEAR = 1916
+END_YEAR = 2021
+YEAR_CNT = 0
 
 RETRY_CNT = 3
 RETRY_DELAY = 3
