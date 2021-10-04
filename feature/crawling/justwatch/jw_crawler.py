@@ -39,7 +39,7 @@ class JWCrawler:
     self.actual_cnt = 0
     self.collected_data = {}
     self.err_list = []
-    self.country = set()
+    # self.country = set()
 
   def init_total_pages(self):
     self.total_pages = 21
@@ -137,8 +137,8 @@ class JWCrawler:
           .add(OTT_TYPE[ofr['monetization_type']])
     
     # 딥버깅
-    for cntry in items['production_countries']:
-      self.country.add(cntry)
+    # for cntry in items['production_countries']:
+    #   self.country.add(cntry)
 
     directors, actors = [], []
     for person in items['credits']:
@@ -162,7 +162,7 @@ class JWCrawler:
       'actors': actors,
       'released_year': items['original_release_year'],
       'runtime': items['runtime'],
-      'summary': re.sub('\r|\n', '', items['short_description']),
+      'summary': items['short_description'], # re.sub('\r|\n', '', items['short_description']),
       'rating': calc_avg(get_scores(items['scoring'])),
       # 'rating_meta':,
       # 'poster_url':,
@@ -257,7 +257,7 @@ if __name__ == '__main__':
             # .print_collected_data()
         crawler.init_total_pages()
     else:
-      print(f'전체 국가 코드: {crawler.country}')
+      # print(f'전체 국가 코드: {crawler.country}')
       print(f'전체 데이터 개수: {crawler.get_data_cnt()}')
       print(f'에러 개수: {len(crawler.err_list)}')
       print(f'에러 목록: {crawler.err_list}')

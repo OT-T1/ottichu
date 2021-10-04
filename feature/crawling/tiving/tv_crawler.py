@@ -1,8 +1,9 @@
+import re
 import time
 import json
 import requests
 
-OTT_PROVIDERS = 'tving'
+OTT_PROVIDERS = 'TVING'
 BASE_URL = 'https://api.tving.com'
 HEADERS = {
   'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36'
@@ -75,7 +76,8 @@ class TVCrawler:
 
   def __put_content_data(self, category, content):
     template_data = {
-      'ott': {OTT_PROVIDERS: ['정액제'] if category == 'program' else [['정액제', '구매'][content['free_yn'] == 'Y']]},
+      'ott': {OTT_PROVIDERS: ['정액제'] if category == 'program' \
+        else [['정액제', '구매'][content['free_yn'] == 'N']]},
       'title': content['name']['ko'],
       'original_title': content['name']['en'] if content['name']['en'] else '',
       'category': 'TV 프로그램' if category == 'program' else '영화',
@@ -85,7 +87,9 @@ class TVCrawler:
       'actors': content['actor'],
       'released_year': content['product_year'],
       'runtime': 0,
-      'summary': content['synopsis']['ko'].replace('\r\n', '') if category == 'program' else content['story']['ko'].replace('\r\n', ''),
+      'summary':  content['synopsis']['ko'] if category == 'program' else content['story']['ko'],
+        # re.sub('\r|\n', '', content['synopsis']['ko']) if category == 'program' \
+        # else re.sub('\r|\n', '', content['story']['ko']),
       'rating': float(content['rating'] if 'rating' in content else 0),
       # 'rating_meta':,
       # 'poster_url':,
