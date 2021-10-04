@@ -45,7 +45,8 @@
       "no-nested-ternary": 0,
       "no-case-declarations": 0,
       "import/prefer-default-export": 0,
-      "no-param-reassign": 0
+      "no-param-reassign": 0,
+      "linebreak-style": ["error", "windows"]
     },
     "env": {
       "browser": true
