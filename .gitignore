@@ -1,0 +1,6 @@
+.DS_Store
+# server
+__pycache__
+.venv
+config.py
+migrations
