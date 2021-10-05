@@ -51,17 +51,17 @@ const MainPage = () => {
   }, []);
 
   const clickHandler = () => {
-    history.replace('/survey');
+    history.replace('/survey#1');
   };
 
   return (
-    <div>
+    <main role="main">
       <nav>navbar도 만들어야될듯</nav>
       <ReactFullpage
         anchors={['1', '2']}
         render={() => (
           <ReactFullpage.Wrapper>
-            <fieldset className="section">
+            <div className="section">
               <StyledSection>
                 <h1>Find your OTT RIGHT NOW!! 🎉</h1>
                 <p>ott 방랑자들에게,, start를 눌러보세요</p>
@@ -74,8 +74,8 @@ const MainPage = () => {
                   icon={faChevronDown}
                 />
               </StyledSection>
-            </fieldset>
-            <fieldset className="section">
+            </div>
+            <div className="section">
               <StyledSection>
                 <Line data={data} />
                 <p>start를 누르거나 스크롤을 내려봐요</p>
@@ -83,11 +83,11 @@ const MainPage = () => {
                   start
                 </button>
               </StyledSection>
-            </fieldset>
+            </div>
           </ReactFullpage.Wrapper>
         )}
       />
-    </div>
+    </main>
   );
 };
 
