@@ -37,7 +37,7 @@ const MainPage = () => {
   const history = useHistory();
 
   const clickHandler = () => {
-    history.replace('/survey');
+    history.replace('/survey#1');
   };
 
   return (
@@ -53,7 +53,7 @@ const MainPage = () => {
         }}
         render={() => (
           <ReactFullpage.Wrapper>
-            <fieldset className="section">
+            <div className="section">
               <h1>Find your OTT RIGHT NOW!! 🎉</h1>
               <p>ott 방랑자들에게,, start를 눌러보세요</p>
               <button type="button" onClick={clickHandler}>
@@ -64,8 +64,8 @@ const MainPage = () => {
                 size="2x"
                 icon={faChevronDown}
               />
-            </fieldset>
-            <fieldset className="section">
+            </div>
+            <div className="section">
               <Line data={data} />
               <p>start를 누르거나 스크롤을 내려봐요</p>
               <button type="button" onClick={clickHandler}>
@@ -76,7 +76,7 @@ const MainPage = () => {
                 size="2x"
                 icon={faChevronDown}
               />
-            </fieldset>
+            </div>
           </ReactFullpage.Wrapper>
         )}
       />

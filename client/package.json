@@ -34,6 +34,7 @@
     "extends": [
       "react-app",
       "airbnb",
+      "prettier",
       "react-app/jest"
     ],
     "rules": {
@@ -49,7 +50,7 @@
       "no-param-reassign": 0,
       "linebreak-style": [
         "error",
-        "unix"
+        "window"
       ]
     },
     "env": {
