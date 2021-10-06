@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import ContentsDiagram from './contentsDiagram';
 import OttList from './ottList';
 import PreferenceChart from './preferenceChart';
 
@@ -53,6 +54,7 @@ const ResultPage = () => {
       <h2>Result Page</h2>
       <PreferenceChart categories={expectedData.category} />
       <OttList expectedData={expectedData} />
+      <ContentsDiagram />
     </div>
   );
 };
