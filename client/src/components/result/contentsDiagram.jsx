@@ -1,7 +1,12 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { VennDiagram } from 'reaviz';
 
-export default function ContentsDiagram() {
+const ContentsDiagram = () => {
+  // TODO: delete this
+  useEffect(() => {
+    console.log('eslint 방지용');
+  }, []);
+
   return (
     <div>
       <h3>취향에 맞는 컨텐츠가 이런 곳에 있어요 😍</h3>
@@ -22,4 +27,6 @@ export default function ContentsDiagram() {
       </div>
     </div>
   );
-}
+};
+
+export default ContentsDiagram;

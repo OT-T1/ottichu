@@ -3,6 +3,7 @@ import ContentsDiagram from './contentsDiagram';
 import OttList from './ottList';
 import PreferenceChart from './preferenceChart';
 
+// TODO: state에 넣을 것
 const expectedData = {
   category: {
     korea_movie: 70,

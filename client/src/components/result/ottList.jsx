@@ -1,20 +1,12 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import Ott from './ott';
 
-// TODO: make file
-function Ott({ ottName }) {
-  return (
-    <div>
-      {Object.keys(ottName).map((col) => (
-        <div>
-          {col}:{ottName[col]}
-        </div>
-      ))}
-    </div>
-  );
-}
+const OttList = ({ expectedData }) => {
+  // TODO: delete this
+  useEffect(() => {
+    console.log('eslint 방지용');
+  }, []);
 
-// TODO: change to arrow function
-export default function OttList({ expectedData }) {
   return (
     <div>
       <h4>당신에게 가장 잘 어울리는 OTT플랫폼은?</h4>
@@ -26,4 +18,6 @@ export default function OttList({ expectedData }) {
       ))}
     </div>
   );
-}
+};
+
+export default OttList;
