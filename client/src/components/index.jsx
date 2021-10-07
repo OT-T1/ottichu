@@ -8,28 +8,21 @@ import styled from 'styled-components';
 
 // 가짜 데이터
 const data = {
-  labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+  labels: ['2020/01', '2020/06', '2020/12', '2021/01', '2021/06', '2021/12'],
   datasets: [
     {
-      label: 'Dataset of Months',
+      label: 'netflix',
+      data: [34, 46, 59, 82, 52, 84],
       fill: false,
-      lineTension: 0.1,
-      backgroundColor: 'rgba(75,192,192,0.4)',
-      borderColor: 'rgba(75,192,192,1)',
-      borderCapStyle: 'butt',
-      borderDash: [],
-      borderDashOffset: 0.0,
-      borderJoinStyle: 'miter',
-      pointBorderColor: 'rgba(75,192,192,1)',
-      pointBackgroundColor: '#fff',
-      pointBorderWidth: 1,
-      pointHoverRadius: 5,
-      pointHoverBackgroundColor: 'rgba(75,192,192,1)',
-      pointHoverBorderColor: 'rgba(220,220,220,1)',
-      pointHoverBorderWidth: 2,
-      pointRadius: 1,
-      pointHitRadius: 10,
-      data: [65, 59, 80, 81, 56, 55, 40],
+      backgroundColor: 'rgb(255, 99, 132)',
+      borderColor: 'rgba(255, 99, 132, 0.2)',
+    },
+    {
+      label: 'whatcha',
+      data: [7, 9, 17, 22, 11, 12],
+      fill: false,
+      backgroundColor: 'rgb(54, 162, 235)',
+      borderColor: 'rgba(54, 162, 235, 0.2)',
     },
   ],
 };
@@ -64,7 +57,11 @@ const MainPage = () => {
             <div className="section">
               <StyledSection>
                 <h1>Find your OTT RIGHT NOW!! 🎉</h1>
-                <p>ott 방랑자들에게,, start를 눌러보세요</p>
+                <p>수많은 OTT플랫폼 중 어떤걸 쓸지 고민되시나요?</p>
+                <p>
+                  당신의 취향에 맞는 컨텐츠를 볼 수 있는 OTT플랫폼을
+                  추천해드려요 😍
+                </p>
                 <button type="button" onClick={clickHandler}>
                   start
                 </button>
@@ -77,8 +74,11 @@ const MainPage = () => {
             </div>
             <div className="section">
               <StyledSection>
-                <Line data={data} />
-                <p>start를 누르거나 스크롤을 내려봐요</p>
+                <p>코로나로 인해 OTT에 대한 관심도가 이렇게 변화되었습니다</p>
+                <div>
+                  <Line data={data} />
+                </div>
+                <p>start를 눌러 시작해보세요</p>
                 <button type="button" onClick={clickHandler}>
                   start
                 </button>
