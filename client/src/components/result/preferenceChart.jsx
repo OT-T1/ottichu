@@ -39,7 +39,7 @@ export default function PreferenceChart({ categories }) {
 
   return (
     <div>
-      <h4>선호 장르, 카테고리 표</h4>
+      <h3>선호 장르, 카테고리 표</h3>
       <div>
         <Bar data={data} options={options} height={300} />
       </div>

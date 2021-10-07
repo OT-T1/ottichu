@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import styled from 'styled-components';
 
 const Ott = ({ ottName }) => {
   // TODO: delete this
@@ -7,14 +8,18 @@ const Ott = ({ ottName }) => {
   }, []);
 
   return (
-    <div>
+    <StyledDiv>
       {Object.keys(ottName).map((col) => (
         <div>
           {col}:{ottName[col]}
         </div>
       ))}
-    </div>
+    </StyledDiv>
   );
 };
+
+const StyledDiv = styled.div`
+  border: 1px solid black;
+`;
 
 export default Ott;

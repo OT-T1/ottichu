@@ -9,7 +9,7 @@ const OttList = ({ expectedData }) => {
 
   return (
     <div>
-      <h4>당신에게 가장 잘 어울리는 OTT플랫폼은?</h4>
+      <h3>당신에게 가장 잘 어울리는 OTT플랫폼은?</h3>
       {Object.keys(expectedData.platform).map((ottName) => (
         <div>
           <div>ott이름: {ottName}</div>
