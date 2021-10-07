@@ -7,3 +7,6 @@ migrations
 
 #client
 node_modules
+
+# data
+.ipynb_checkpoints
