@@ -1,12 +1,12 @@
 from db_connect import db
 
 
-class actors(db.Model):
-    __tablename__ = "actors"
+class genres(db.Model):
+    __tablename__ = "genres"
     __table_args__ = {"mysql_collate": "utf8_general_ci"}
 
-    actor_code = db.Column(
+    genre_code = db.Column(
         db.Integer, primary_key=True, nullable=False, autoincrement=True
     )
 
-    actor = db.Column(db.String(255), nullable=False)
+    genre = db.Column(db.String(255), unique=True, nullable=False)

@@ -1,8 +1,8 @@
 from db_connect import db
 
 
-class content_actor(db.Model):
-    __tablename__ = "content_actor"
+class content_genre(db.Model):
+    __tablename__ = "content_genre"
     __table_args__ = {"mysql_collate": "utf8_general_ci"}
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
@@ -13,8 +13,8 @@ class content_actor(db.Model):
         nullable=False,
     )
 
-    actor_code = db.Column(
-        db.Integer,
-        db.ForeignKey("actors.actor_code", ondelete="CASCADE", onupdate="CASCADE"),
+    genre = db.Column(
+        db.String(255),
+        db.ForeignKey("genres.genre", ondelete="CASCADE", onupdate="CASCADE"),
         nullable=False,
     )
