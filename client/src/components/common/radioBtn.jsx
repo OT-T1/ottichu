@@ -1,8 +1,8 @@
 import React from 'react';
 
-const RadioBtn = ({ id, name, value, defaultChecked, text, onClick }) => (
+const RadioBtn = ({ id, name, label, value, defaultChecked, onClick }) => (
   <label htmlFor={id}>
-    {text}
+    {label}
     <input
       type="radio"
       id={id}

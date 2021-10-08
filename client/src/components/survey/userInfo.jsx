@@ -1,77 +1,70 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { actionCreator, selector } from '../../store/modules';
+import { actions, selector } from '../../store/modules';
 import RadioBtn from '../common/radioBtn';
 
 const UserInfo = () => {
   const dispatch = useDispatch();
   const userAge = useSelector(selector.getUserAge);
-  const userGender = useSelector(selector.getGender);
-
-  const saveAge = useCallback(
-    (e) => dispatch(actionCreator.saveAge(e.target.value)),
-    [dispatch],
+  const userGender = useSelector(selector.getUserGender);
+  const AGES = useMemo(
+    () => [
+      { id: 'age--teenager', label: '10대 이하', value: '10' },
+      { id: 'age--twenties', label: '20대', value: '20' },
+      { id: 'age--thirties', label: '30대', value: '30' },
+      { id: 'age--forties', label: '40대 이상', value: '40' },
+    ],
+    [],
   );
-  const saveGender = useCallback(
-    (e) => dispatch(actionCreator.saveGender(e.target.value)),
-    [dispatch],
+  const GENDERS = useMemo(
+    () => [
+      { id: 'gender--male', label: '남성', value: 'male' },
+      { id: 'gender--female', label: '여성', value: 'female' },
+    ],
+    [],
+  );
+  const ACTIONS = useMemo(
+    () => ({
+      age_opt: actions.selectAge,
+      gender_opt: actions.selectGender,
+    }),
+    [],
+  );
+
+  const handleUser = useCallback(
+    (e) => dispatch(ACTIONS[e.target.name](e.target.value)),
+    [dispatch, ACTIONS],
   );
 
   return (
     <div>
       <fieldset>
         <legend>나이</legend>
-        <RadioBtn
-          id="teenager"
-          name="age"
-          value="10"
-          defaultChecked={userAge === '10'}
-          text="10대 이하"
-          onClick={saveAge}
-        />
-        <RadioBtn
-          id="twenties"
-          name="age"
-          value="20"
-          defaultChecked={userAge === '20'}
-          text="20대"
-          onClick={saveAge}
-        />
-        <RadioBtn
-          id="thirties"
-          name="age"
-          value="30"
-          defaultChecked={userAge === '30'}
-          text="30대"
-          onClick={saveAge}
-        />
-        <RadioBtn
-          id="forties"
-          name="age"
-          value="40"
-          defaultChecked={userAge === '40'}
-          text="40대 이상"
-          onClick={saveAge}
-        />
+        {AGES.map(({ id, label, value }) => (
+          <RadioBtn
+            key={id}
+            id={id}
+            name="age_opt"
+            label={label}
+            value={value}
+            defaultChecked={userAge === value}
+            onClick={handleUser}
+          />
+        ))}
       </fieldset>
       <fieldset>
         <legend>성별</legend>
-        <RadioBtn
-          id="male"
-          name="gender"
-          value="male"
-          defaultChecked={userGender === 'male'}
-          text="남성"
-          onClick={saveGender}
-        />
-        <RadioBtn
-          id="female"
-          name="gender"
-          value="female"
-          defaultChecked={userGender === 'female'}
-          text="여성"
-          onClick={saveGender}
-        />
+        {GENDERS.map(({ id, label, value }) => (
+          <RadioBtn
+            key={id}
+            id={id}
+            name="gender_opt"
+            label={label}
+            value={value}
+            defaultChecked={userGender === value}
+            onClick={handleUser}
+          />
+        ))}
       </fieldset>
     </div>
   );

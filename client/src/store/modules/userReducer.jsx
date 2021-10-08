@@ -3,26 +3,24 @@ import { createSlice, createSelector } from '@reduxjs/toolkit';
 const initialState = {
   age: '',
   gender: '',
-  // TODO: 추가 정보(즐기는 컨텐츠, 좋아하는 감독, 배우 등)
-  // contents: {
-  //   krMovie:,
-  //   frMovie:,
-  //   krDrama:,
-  //   usDrama:,
-  // },
 };
 
 const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
-    saveAge(state, action) {
+    loadUserInfo(state, action) {
+      const { age, gender } = action.payload;
+      state.age = age || initialState.age;
+      state.gender = gender || initialState.gender;
+    },
+    selectAge(state, action) {
       if (state.age === action.payload) {
         return;
       }
       state.age = action.payload;
     },
-    saveGender(state, action) {
+    selectGender(state, action) {
       if (state.gender === action.payload) {
         return;
       }
@@ -41,16 +39,25 @@ const userSlice = createSlice({
 });
 
 const getUserAge = (state) => state.user.age;
-const getGender = (state) => state.user.gender;
-const isUserSectionAnswered = createSelector(
-  [getUserAge, getGender],
-  (userAge, userGender) => !!(userAge && userGender),
+const getUserGender = (state) => state.user.gender;
+
+const isUserInfoAnswered = createSelector(
+  [getUserAge, getUserGender],
+  (age, gender) => !!(age && gender),
+);
+const getUserInfo = createSelector(
+  [getUserAge, getUserGender],
+  (age, gender) => ({
+    age,
+    gender,
+  }),
 );
 
-export const userActionCreator = userSlice.actions;
+export const userActions = userSlice.actions;
 export const userSelector = {
   getUserAge,
-  getGender,
-  isUserSectionAnswered,
+  getUserGender,
+  isUserInfoAnswered,
+  getUserInfo,
 };
 export default userSlice.reducer;
