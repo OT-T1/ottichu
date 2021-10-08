@@ -1,8 +1,8 @@
 from db_connect import db
 
 
-class content_actor(db.Model):
-    __tablename__ = "content_actor"
+class content_director(db.Model):
+    __tablename__ = "content_director"
     __table_args__ = {
         "mysql_default_charset": "utf8mb4",
         "mysql_collate": "utf8mb4_general_ci",
@@ -16,8 +16,8 @@ class content_actor(db.Model):
         nullable=False,
     )
 
-    actor = db.Column(
+    director = db.Column(
         db.String(255),
-        db.ForeignKey("actors.actor", ondelete="CASCADE", onupdate="CASCADE"),
+        db.ForeignKey("directors.director", ondelete="CASCADE", onupdate="CASCADE"),
         nullable=False,
     )
