@@ -3,7 +3,10 @@ from db_connect import db
 
 class users(db.Model):
     __tablename__ = "users"
-    __table_args__ = {"mysql_collate": "utf8_general_ci"}
+    __table_args__ = {
+        "mysql_default_charset": "utf8mb4",
+        "mysql_collate": "utf8mb4_general_ci",
+    }
 
     user_code = db.Column(
         db.Integer, primary_key=True, autoincrement=True, nullable=False

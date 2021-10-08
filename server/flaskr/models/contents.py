@@ -3,7 +3,10 @@ from db_connect import db
 
 class contents(db.Model):
     __tablename__ = "contents"
-    __table_args__ = {"mysql_collate": "utf8_general_ci"}
+    __table_args__ = {
+        "mysql_default_charset": "utf8mb4",
+        "mysql_collate": "utf8mb4_general_ci",
+    }
 
     content_code = db.Column(
         db.Integer, primary_key=True, autoincrement=True, nullable=False
@@ -13,7 +16,6 @@ class contents(db.Model):
 
     summary = db.Column(db.Text())
     category = db.Column(db.String(50))
-    genre = db.Column(db.String(255))
     released_year = db.Column(db.String(20))
     run_time = db.Column(db.String(20))
 

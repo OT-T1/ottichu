@@ -3,7 +3,10 @@ from db_connect import db
 
 class content_director(db.Model):
     __tablename__ = "content_director"
-    __table_args__ = {"mysql_collate": "utf8_general_ci"}
+    __table_args__ = {
+        "mysql_default_charset": "utf8mb4",
+        "mysql_collate": "utf8mb4_general_ci",
+    }
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
 
