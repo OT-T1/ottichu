@@ -20,7 +20,10 @@ class DataPutter:
         self.actors = set()
         self.directors = set()
         self.contents = []
+        self.genres = set()
         self.content_actor = []
+        self.content_director = []
+        self.content_genre = []
         # self.ott_infos = []
 
     def connect_db(self, info={}):
@@ -63,7 +66,6 @@ class DataPutter:
                 content["title"],
                 content["summary"],
                 content["category"],
-                "|".join(ast.literal_eval(content["genre"])),
                 str(content["runtime"]),
                 content["released_year"],
                 content["rating"],
@@ -78,17 +80,36 @@ class DataPutter:
     def __classify_data(self, data):
         if not data:
             return
+
         for content_code, content in data.items():
-            tmp_actors = ast.literal_eval(content["actors"])
-            # 'actors' Table Data
-            self.actors |= set(tmp_actors)
-            # 'directors' Table Data
-            self.directors |= set(ast.literal_eval(content["director"]))
             # 'contents' Table Data
             self.__add_content(content)
+
+            # string to list
+            list_actors = ast.literal_eval(content["actors"])
+            list_directors = ast.literal_eval(content["director"])
+            list_genres = ast.literal_eval(content["genre"])
+
             # 'content_actor' Table Data
-            for tmp_actor in tmp_actors:
-                self.content_actor.append((int(content_code) + 1, tmp_actor))
+            self.content_actor += list(
+                map(lambda x: (int(content_code) + 1, x), list_actors)
+            )
+            # 'content_director' Table Data
+            self.content_director += list(
+                map(lambda x: (int(content_code) + 1, x), list_directors)
+            )
+            # 'content_genre' Table Data
+            self.content_genre += list(
+                map(lambda x: (int(content_code) + 1, x), list_genres)
+            )
+
+            # 'actors' Table Data
+            self.actors |= set(list_actors)
+            # 'directors' Table Data
+            self.directors |= set(list_directors)
+            # 'genres' Table Data
+            self.genres |= set(list_genres)
+            self.genres -= {"Made in Europe", ""}
 
     def read_data(self, file):
         type = file.split(".")[-1]
@@ -105,8 +126,32 @@ class DataPutter:
             return
         # Auto_increment 초기화
         self.cursor.execute("ALTER TABLE actors AUTO_INCREMENT = 0")
-        for name in self.actors:
-            self.cursor.execute("INSERT INTO actors(actor) VALUES(%s)", name)
+        self.cursor.executemany(
+            "INSERT INTO actors(actor) VALUES(%s)",
+            self.actors,
+        )
+        return self
+
+    def insert_directors(self):
+        if not self.cursor:
+            return
+        # Auto_increment 초기화
+        self.cursor.execute("ALTER TABLE directors AUTO_INCREMENT = 0")
+        self.cursor.executemany(
+            "INSERT INTO directors(director) VALUES(%s)",
+            self.directors,
+        )
+        return self
+
+    def insert_genres(self):
+        if not self.cursor:
+            return
+        # Auto_increment 초기화
+        self.cursor.execute("ALTER TABLE genres AUTO_INCREMENT = 0")
+        self.cursor.executemany(
+            "INSERT INTO genres(genre) VALUES(%s)",
+            self.genres,
+        )
         return self
 
     def insert_contents(self):
@@ -121,7 +166,6 @@ class DataPutter:
             title,
             summary,
             category,
-            genre,
             run_time,
             released_year,
             rating,
@@ -130,7 +174,7 @@ class DataPutter:
             is_wavve,
             is_watcha,
             is_coupang
-        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """,
             self.contents,
         )
@@ -149,6 +193,27 @@ class DataPutter:
         return self
 
     def insert_content_director(self):
+        if not self.cursor:
+            return
+        # Auto_increment 초기화
+        self.cursor.execute("ALTER TABLE content_director AUTO_INCREMENT = 0")
+        # TODO: Check Record(SELECT title)
+        self.cursor.executemany(
+            "INSERT INTO content_director(content_code, director) VALUES(%s, %s)",
+            self.content_director,
+        )
+        return self
+
+    def insert_content_genre(self):
+        if not self.cursor:
+            return
+        # Auto_increment 초기화
+        self.cursor.execute("ALTER TABLE content_genre AUTO_INCREMENT = 0")
+        # TODO: Check Record(SELECT title)
+        self.cursor.executemany(
+            "INSERT INTO content_genre(content_code, genre) VALUES(%s, %s)",
+            self.content_genre,
+        )
         return self
 
     # TODO: 아직 미구현.
@@ -156,8 +221,9 @@ class DataPutter:
         pass
         return self
 
-    def delete_table_data(self, table_name):
-        self.cursor.execute(f"DELETE FROM {table_name}")
+    def delete_table_data(self, table_name=None):
+        for i in ["actors", "contents", "directors", "genres", "content_actor"]:
+            self.cursor.execute(f"DELETE FROM {i}")
         return self
 
     # TEST
@@ -173,16 +239,11 @@ if __name__ == "__main__":
     # test_func()
     insertor = DataPutter()
     try:
+
         insertor.connect_db().read_data(
-            "/Users/jeonggyu/Desktop/Elice/EliceProject/ott-service-project/data/db_putter/test.json"
-        ).insert_content_actor().apply_to_db().close_db()
+            "/Users/jeonggyu/Desktop/수집한 dataset/data/final_total_data.json"
+        ).insert_actors().insert_contents().insert_genres().insert_directors().insert_content_actor().insert_content_director().insert_content_genre().apply_to_db().close_db()
 
-        # 삭제
-        # insertor.connect_db().delete_table_data("contents").apply_to_db().close_db()
-
-        # apply_to_db().close_db()
-        # .insert_actors().apply_to_db().close_db()
-        # .insert_actors()
-        # .insert_contents()
     except Exception as e:
+        insertor.db.rollback()
         print(f"Error Message: {e}")
