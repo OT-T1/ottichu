@@ -20,7 +20,7 @@ def create_app(test_config=None):
 
     # DB와 app 이어주기 및 migration 설정
     db.init_app(app)
-    Migrate().init_app(app, db)
+    Migrate().init_app(app, db, compare_type=True)
     from flaskr.models import (
         actors,
         content_actor,
