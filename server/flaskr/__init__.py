@@ -3,9 +3,14 @@ from db_connect import db
 from flask import Flask
 from flask_migrate import Migrate
 
+from flaskr.controller import data, user
+
 
 def create_app(test_config=None):
     app = Flask(__name__)
+
+    app.register_blueprint(data)
+    app.register_blueprint(user)
 
     # Config 설정
     if test_config is None:
