@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import styled from 'styled-components';
 import { Bar } from 'react-chartjs-2';
 
 export default function PreferenceChart({ categories }) {
@@ -17,8 +18,11 @@ export default function PreferenceChart({ categories }) {
       labels,
       datasets: [
         {
+          label: '장르 선호도',
           borderWidth: 1,
           data: percent,
+          backgroundColor: ['rgba(75, 192, 192, 0.2)'],
+          borderColor: ['rgb(75, 192, 192)'],
         },
       ],
     };
@@ -29,14 +33,22 @@ export default function PreferenceChart({ categories }) {
   return (
     <div>
       <h3>선호 장르, 카테고리 표</h3>
-      <div style={{ width: '600px' }}>
+      <StyledDiv>
         <Bar data={data} options={{ maintainAspectRatio: false }} />
-      </div>
-      {Object.keys(categories).map((category) => (
-        <div>
-          {category}:{categories[category]}
-        </div>
-      ))}
+      </StyledDiv>
     </div>
   );
 }
+
+const StyledDiv = styled.div`
+  width: 629px;
+  height: 289px;
+  background: linear-gradient(
+    126.6deg,
+    rgba(255, 255, 255, 0.12) 28.69%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  backdrop-filter: blur(140px);
+  border-radius: 25px;
+  border: 2px solid #ffffff1f;
+`;
