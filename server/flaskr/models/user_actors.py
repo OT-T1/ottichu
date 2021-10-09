@@ -10,9 +10,9 @@ class user_actors(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
 
-    actor_code = db.Column(
-        db.Integer,
-        db.ForeignKey("actors.actor_code", ondelete="CASCADE", onupdate="CASCADE"),
+    actor = db.Column(
+        db.String(255),
+        db.ForeignKey("actors.actor", ondelete="CASCADE", onupdate="CASCADE"),
         nullable=False,
     )
 
@@ -21,3 +21,7 @@ class user_actors(db.Model):
         db.ForeignKey("users.user_code", ondelete="CASCADE", onupdate="CASCADE"),
         nullable=False,
     )
+
+    def __init__(self, actor, user_code):
+        self.actor = actor
+        self.user_code = user_code

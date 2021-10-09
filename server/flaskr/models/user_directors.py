@@ -10,11 +10,9 @@ class user_directors(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
 
-    director_code = db.Column(
-        db.Integer,
-        db.ForeignKey(
-            "directors.director_code", ondelete="CASCADE", onupdate="CASCADE"
-        ),
+    director = db.Column(
+        db.String(255),
+        db.ForeignKey("directors.director", ondelete="CASCADE", onupdate="CASCADE"),
         nullable=False,
     )
 
@@ -23,3 +21,7 @@ class user_directors(db.Model):
         db.ForeignKey("users.user_code", ondelete="CASCADE", onupdate="CASCADE"),
         nullable=False,
     )
+
+    def __init__(self, director, user_code):
+        self.director = director
+        self.user_code = user_code

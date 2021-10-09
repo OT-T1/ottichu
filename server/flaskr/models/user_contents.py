@@ -21,3 +21,7 @@ class user_contents(db.Model):
         db.ForeignKey("users.user_code", ondelete="CASCADE", onupdate="CASCADE"),
         nullable=False,
     )
+
+    def __init__(self, content_code, user_code):
+        self.content_code = content_code
+        self.user_code = user_code
