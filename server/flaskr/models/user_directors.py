@@ -21,3 +21,7 @@ class user_directors(db.Model):
         db.ForeignKey("users.user_code", ondelete="CASCADE", onupdate="CASCADE"),
         nullable=False,
     )
+
+    def __init__(self, director, user_code):
+        self.director = director
+        self.user_code = user_code

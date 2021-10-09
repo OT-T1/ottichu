@@ -21,3 +21,7 @@ class user_actors(db.Model):
         db.ForeignKey("users.user_code", ondelete="CASCADE", onupdate="CASCADE"),
         nullable=False,
     )
+
+    def __init__(self, actor, user_code):
+        self.actor = actor
+        self.user_code = user_code
