@@ -3,6 +3,7 @@ from db_connect import db
 from flask import Flask
 from flask_cors import CORS
 from flask_migrate import Migrate
+from mecab import mecab_data
 
 from flaskr.controller import data, user
 
@@ -39,4 +40,8 @@ def create_app(test_config=None):
 
     CORS(app)
 
+    # 현재 mecab_data를 객체로 저장
+    mecab_data.make_data()
+    mecab_data.make_doc2vec_data("mecab_tok", tagged=True)
+    mecab_data.make_doc2vec_data("mecab_tok", tagged=False)
     return app
