@@ -45,7 +45,6 @@ const MainPage = () => {
 
   return (
     <main role="main">
-      <nav>navbar도 만들어야될듯</nav>
       <ReactFullpage
         anchors={['1', '2']}
         render={() => (
