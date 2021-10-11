@@ -1,12 +1,11 @@
 import React from 'react';
 
-const RadioBtn = ({ id, name, label, value, defaultChecked, onClick }) => (
+const CheckBox = ({ id, label, value, defaultChecked, onClick }) => (
   <label htmlFor={id}>
     {label}
     <input
-      type="radio"
+      type="checkbox"
       id={id}
-      name={name}
       value={value}
       defaultChecked={defaultChecked}
       onClick={onClick}
@@ -14,4 +13,4 @@ const RadioBtn = ({ id, name, label, value, defaultChecked, onClick }) => (
   </label>
 );
 
-export default RadioBtn;
+export default CheckBox;

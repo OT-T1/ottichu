@@ -2,11 +2,12 @@ import React, { useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { selector } from '../../store/modules';
 
-const StepBar = (pageIndex) => {
-  const sectionsState = useSelector(selector.getSectionsState);
+const StepBar = ({ anchors }) => {
+  const sectionsState = useSelector(selector.getSurveySectionState);
 
   const tmpColor = useCallback(
-    (index) => (sectionsState[index] ? 'black' : 'transparent'),
+    (section, slide) =>
+      sectionsState[section][slide] ? 'black' : 'transparent',
     [sectionsState],
   );
 
@@ -14,6 +15,7 @@ const StepBar = (pageIndex) => {
     console.log(sectionsState);
   }, [sectionsState]);
 
+  // TODO: 대애충 임시 확인용 코드
   return (
     <aside
       style={{
@@ -22,46 +24,20 @@ const StepBar = (pageIndex) => {
         left: 10,
       }}
     >
-      <div
-        style={{
-          width: 20,
-          height: 20,
-          background: `${tmpColor(0)}`,
-          borderRadius: 50,
-        }}
-      >
-        {pageIndex[0]}
-      </div>
-      <div
-        style={{
-          width: 20,
-          height: 20,
-          background: `${tmpColor(1)}`,
-          borderRadius: 50,
-        }}
-      >
-        {pageIndex[1]}
-      </div>
-      <div
-        style={{
-          width: 20,
-          height: 20,
-          background: `${tmpColor(2)}`,
-          borderRadius: 50,
-        }}
-      >
-        {pageIndex[2]}
-      </div>
-      <div
-        style={{
-          width: 20,
-          height: 20,
-          background: `${tmpColor(3)}`,
-          borderRadius: 50,
-        }}
-      >
-        {pageIndex[3]}
-      </div>
+      {anchors &&
+        anchors.map((anchor, index) => (
+          <div
+            key={anchor}
+            style={{
+              width: 20,
+              height: 20,
+              background: `${tmpColor(index, 0)}`,
+              borderRadius: 50,
+            }}
+          >
+            {anchor}
+          </div>
+        ))}
     </aside>
   );
 };

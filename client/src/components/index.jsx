@@ -1,10 +1,12 @@
-import React, { useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import React, { useCallback, useEffect } from 'react';
 import ReactFullpage from '@fullpage/react-fullpage';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { Line } from 'react-chartjs-2';
 import styled from 'styled-components';
+import { useDispatch } from 'react-redux';
+import { useHistory } from 'react-router-dom';
+import { actions } from '../store/modules';
 
 // 가짜 데이터
 const data = {
@@ -36,6 +38,7 @@ const data = {
 
 const MainPage = () => {
   const history = useHistory();
+  const dispatch = useDispatch();
 
   const scrollDownHander = () => {
     console.log('scroll');
@@ -50,9 +53,25 @@ const MainPage = () => {
     };
   }, []);
 
-  const clickHandler = () => {
-    history.replace('/survey#1');
-  };
+  const clickHandler = useCallback(() => {
+    // Check data in local storage
+    const record = window.localStorage.getItem('fyott');
+    if (
+      record &&
+      window.confirm(
+        '이전에 작성하신 기록이 존재합니다.\r\n이어서 진행하시겠습니까?',
+      )
+    ) {
+      dispatch(actions.requestLoad(record));
+      console.log(history);
+      return;
+    }
+
+    // TODO: 히스토리 넣어도 여기 왜오니
+    console.log('돌아가!!!!!!');
+    window.localStorage.removeItem('fyott');
+    history.push('/survey#1');
+  }, [dispatch, history]);
 
   return (
     <main role="main">
