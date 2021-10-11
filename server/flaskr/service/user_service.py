@@ -40,8 +40,18 @@ class User:
                 )
                 db.session.add(new_user_directors)
             db.session.commit()
-            return jsonify(result="created"), 201
+            return jsonify(result="created", user_code=user_code), 201
         except Exception as e:
             print(e)
             db.session.rollback()
             return jsonify(result="fail"), 400
+
+    def input_user_contents(data):
+        try:
+            for content, user in data["contents"]:
+                user_contents(content, user)
+            return jsonify(result="created"), 201
+        except Exception as e:
+            print(e)
+            db.session.rollback()
+            return jsonify(result="fail"), 401
