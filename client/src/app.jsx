@@ -7,7 +7,7 @@ import {
   // Redirect,
 } from 'react-router-dom';
 import './app.css';
-import MainPage from './components';
+import MainPage from './components/main';
 import ResultPage from './components/result';
 import SurveyPage from './components/survey';
 import store from './store';
