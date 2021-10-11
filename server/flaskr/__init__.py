@@ -1,6 +1,7 @@
 import config
 from db_connect import db
 from flask import Flask
+from flask_cors import CORS
 from flask_migrate import Migrate
 
 from flaskr.controller import data, user
@@ -35,5 +36,7 @@ def create_app(test_config=None):
         user_directors,
         users,
     )
+
+    CORS(app)
 
     return app
