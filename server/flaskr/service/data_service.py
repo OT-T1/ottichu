@@ -34,7 +34,21 @@ class Directors:
 class Contents:
     def get_contents():
         try:
-            return jsonify(contents="content"), 200
+            tmp = [
+                [
+                    1,
+                    "괴물",
+                    "봉준호",
+                    "https://upload.wikimedia.org/wikipedia/ko/6/6a/%EA%B4%B4%EB%AC%BC.jpg",
+                ],
+                [
+                    2,
+                    "오징어게임",
+                    "황동혁",
+                    "https://img.khan.co.kr/news/2021/09/30/l_2021093001003585000310901.jpg",
+                ],
+            ]
+            return jsonify(contents=tmp), 200
         except Exception as e:
             print(e)
             return jsonify(result="fail"), 400

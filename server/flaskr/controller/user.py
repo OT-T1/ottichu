@@ -13,7 +13,8 @@ def post_user_input():
 # 유저가 선택한 컨텐츠
 @user.route("/contents", methods=["PATCH"])
 def patch_user_content():
-    return None
+    data = request.json
+    return User.input_user_contents(data=data)
 
 
 # 결과 데이터
