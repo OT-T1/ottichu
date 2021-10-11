@@ -20,7 +20,7 @@ class Data:
         self.data = None
         self.data_doc_tok_tag = None
         self.data_doc_tok = None
-        self.model = Doc2Vec.load("./True_content_model.doc2vec")
+        self.model_tok = Doc2Vec.load("./True_content_model.doc2vec")
         print("init func")
 
     def make_data(self):
