@@ -355,7 +355,7 @@ export const whatchaData = {
   labels,
   datasets: [
     {
-      label: '티빙',
+      label: '왓챠',
       data: whatchaAmount,
       fill: false,
       borderColor: '#B48EAD',
