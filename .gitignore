@@ -4,6 +4,7 @@ __pycache__
 .venv
 config.py
 migrations
-
+mecab-*
+True_content_model.doc2vec
 #client
 node_modules
