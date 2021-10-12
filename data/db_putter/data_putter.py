@@ -74,6 +74,8 @@ class DataPutter:
                 content["ott.wavve"] is not None,
                 content["ott.Watcha"] is not None,
                 content["ott.coupang"] is not None,
+                str(content["imgurl"]),
+                str(content["s3_imgurl"]),
             )
         )
 
@@ -173,8 +175,10 @@ class DataPutter:
             is_tving,
             is_wavve,
             is_watcha,
-            is_coupang
-        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            is_coupang,
+            original_img,
+            s3_img
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """,
             self.contents,
         )
@@ -241,7 +245,7 @@ if __name__ == "__main__":
     try:
 
         insertor.connect_db().read_data(
-            "/Users/jeonggyu/Desktop/수집한 dataset/data/final_total_data.json"
+            "/Users/jeonggyu/Desktop/수집한 dataset/new_data/del_nan_final_total_data.json"
         ).insert_actors().insert_contents().insert_genres().insert_directors().insert_content_actor().insert_content_director().insert_content_genre().apply_to_db().close_db()
 
     except Exception as e:
