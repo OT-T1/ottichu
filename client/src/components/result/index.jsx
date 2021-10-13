@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
+import { useSelector } from 'react-redux';
 import ContentsDiagram from './contentsDiagram';
 import OttList from './ottList';
 import PreferenceChart from './preferenceChart';
 import api from '../../api';
 import KeywordCloud from './keywordCloud';
+import { selector } from '../../store/modules';
 
 const ResultPage = () => {
   const [result, setResult] = useState(null);
   const [wordData, setWordData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const user = useSelector(selector.getUser);
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -18,9 +21,9 @@ const ResultPage = () => {
         setError(null);
         setResult(null);
         setLoading(true);
-        const apiResult = await api.getResults();
+        const apiResult = await api.getResults({ user_code: user });
         setResult(apiResult);
-        const apiData = await api.getWordCloudData();
+        const apiData = await api.getWordCloudData({ user_code: user });
         setWordData(apiData);
 
         console.log(`💩 ${apiData}`);
@@ -31,7 +34,7 @@ const ResultPage = () => {
     };
 
     fetchResults();
-  }, []);
+  }, [user]);
 
   if (loading) return <div>Loading..</div>;
   if (error) return <div>에러발생</div>;
