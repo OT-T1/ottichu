@@ -4,6 +4,7 @@ from db_connect import db
 from flask import jsonify
 from flaskr.models import (
     actors,
+    contents,
     directors,
     user_actors,
     user_contents,
@@ -75,11 +76,33 @@ class Contents:
                 t_user_actors, t_user_directors, tmp, t_user_contents
             )
 
+            def get_content_data(contents_list):
+                result_contents = []
+                for content in contents_list:
+                    t_content = (
+                        db.session.query(contents)
+                        .filter(contents.content_code == int(content))
+                        .one()
+                    )
+                    result_contents.append(
+                        (
+                            t_content.content_code,
+                            t_content.title,
+                            t_content.director,
+                            t_content.s3_img,
+                        )
+                    )
+                return result_contents
+
             # 첫 추천
             if len(t_user_contents) == 0:
-                return jsonify(self.get_first_10_contents(user_prefiltered))
+                contents_list = self.get_first_10_contents(user_prefiltered)
+
+                return jsonify(contents=get_content_data(contents_list))
             # 선택된 컨텐츠 기반 추천
-            return jsonify(self.get_another_10_contents(user_prefiltered))
+            else:
+                contents_list = self.get_another_10_contents(user_prefiltered)
+                return jsonify(contents=get_content_data(contents_list))
 
         except Exception as e:
             print(e)
