@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { Bar } from 'react-chartjs-2';
+import { Pie } from 'react-chartjs-2';
 
 export default function PreferenceChart({ categories }) {
   const [data, setData] = useState({ labels: [], datasets: [] });
@@ -21,7 +21,7 @@ export default function PreferenceChart({ categories }) {
           label: '장르 선호도',
           borderWidth: 1,
           data: percent,
-          backgroundColor: ['rgba(75, 192, 192, 0.2)'],
+          backgroundColor: ['green', 'red', 'blue', 'yellow', 'pink'],
           borderColor: ['rgb(75, 192, 192)'],
         },
       ],
@@ -31,18 +31,18 @@ export default function PreferenceChart({ categories }) {
   }, [categories]);
 
   return (
-    <div>
-      <h3>선호 장르, 카테고리 표</h3>
+    <TestDiv>
+      <h1>선호 장르 표</h1>
       <StyledDiv>
-        <Bar data={data} options={{ maintainAspectRatio: false }} />
+        <Pie data={data} options={{ maintainAspectRatio: false }} />
       </StyledDiv>
-    </div>
+    </TestDiv>
   );
 }
 
 const StyledDiv = styled.div`
-  width: 629px;
-  height: 289px;
+  width: 40vw;
+  height: 36vh;
   background: linear-gradient(
     126.6deg,
     rgba(255, 255, 255, 0.12) 28.69%,
@@ -51,4 +51,8 @@ const StyledDiv = styled.div`
   backdrop-filter: blur(140px);
   border-radius: 25px;
   border: 2px solid #ffffff1f;
+`;
+
+const TestDiv = styled.div`
+  border: 2px solid red;
 `;
