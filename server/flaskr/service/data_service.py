@@ -1,6 +1,19 @@
+import numpy as np
+import pandas as pd
 from db_connect import db
 from flask import jsonify
-from flaskr.models import actors, directors
+from flaskr.models import (
+    actors,
+    content_director,
+    contents,
+    directors,
+    user_actors,
+    user_contents,
+    user_directors,
+    users,
+)
+from flaskr.service.recommend_service import Recommendation
+from mecab import mecab_data
 
 
 class Actors:
@@ -32,23 +45,43 @@ class Directors:
 
 
 class Contents:
-    def get_contents():
+    def get_contents(self, user_code):
         try:
-            tmp = [
-                [
-                    1,
-                    "괴물",
-                    "봉준호",
-                    "https://upload.wikimedia.org/wikipedia/ko/6/6a/%EA%B4%B4%EB%AC%BC.jpg",
-                ],
-                [
-                    2,
-                    "오징어게임",
-                    "황동혁",
-                    "https://img.khan.co.kr/news/2021/09/30/l_2021093001003585000310901.jpg",
-                ],
-            ]
-            return jsonify(contents=tmp), 200
+            recom = Recommendation()
+            user_prefiltered, first = recom.get_user_data(user_code)
+
+            # 첫 추천
+            if first:
+                contents_list = recom.get_first_10_contents(user_prefiltered)
+                return jsonify(contents=self.get_content_data(contents_list))
+            # 선택된 컨텐츠 기반 추천
+            else:
+                contents_list = recom.get_another_10_contents(user_prefiltered)
+                return jsonify(contents=self.get_content_data(contents_list))
+
         except Exception as e:
             print(e)
             return jsonify(result="fail"), 400
+
+    def get_content_data(self, contents_list):
+        result_contents = []
+        for content in contents_list:
+            t_content = (
+                db.session.query(contents)
+                .filter(contents.content_code == int(content))
+                .one()
+            )
+            t_directors = (
+                db.session.query(content_director)
+                .filter(content_director.content_code == int(content))
+                .all()
+            )
+            result_contents.append(
+                (
+                    t_content.content_code,
+                    t_content.title,
+                    [t_director.director for t_director in t_directors],
+                    t_content.s3_img,
+                )
+            )
+        return result_contents
