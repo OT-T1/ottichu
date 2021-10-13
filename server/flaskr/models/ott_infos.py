@@ -3,7 +3,10 @@ from db_connect import db
 
 class ott_infos(db.Model):
     __tablename__ = "ott_infos"
-    __table_args__ = {"mysql_collate": "utf8_general_ci"}
+    __table_args__ = {
+        "mysql_default_charset": "utf8mb4",
+        "mysql_collate": "utf8mb4_general_ci",
+    }
 
     code = db.Column(db.String(20), primary_key=True, nullable=False)
 
