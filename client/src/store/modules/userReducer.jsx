@@ -1,6 +1,7 @@
 import { createSlice, createSelector } from '@reduxjs/toolkit';
 
 const initialState = {
+  user: null,
   age: '',
   gender: '',
 };
@@ -10,7 +11,8 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     loadUserInfo(state, action) {
-      const { age, gender } = action.payload;
+      const { user, age, gender } = action.payload;
+      state.user = user;
       state.age = age || initialState.age;
       state.gender = gender || initialState.gender;
     },
@@ -26,28 +28,25 @@ const userSlice = createSlice({
       }
       state.gender = action.payload;
     },
-    // TODO: 회원가입을 할거라면?
-    // saveName(state, action) {
-    //   userName = action.payload;
-    //   valid_form = /^([a-zA-Z]|[가-힣]){2,50}$/;
-    //   if (!userName || !valid_form.test(userName)) {
-    //     return state;
-    //   }
-    //   state.name = action.payload;
-    // },
+    registerUserCode(state, action) {
+      const user = action.payload;
+      state.user = user;
+    },
   },
 });
 
 const getUserAge = (state) => state.user.age;
 const getUserGender = (state) => state.user.gender;
+const getUser = (state) => state.user.user;
 
 const isUserInfoAnswered = createSelector(
   [getUserAge, getUserGender],
   (age, gender) => !!(age && gender),
 );
 const getUserInfo = createSelector(
-  [getUserAge, getUserGender],
-  (age, gender) => ({
+  [getUser, getUserAge, getUserGender],
+  (user, age, gender) => ({
+    user,
     age,
     gender,
   }),
@@ -57,6 +56,7 @@ export const userActions = userSlice.actions;
 export const userSelector = {
   getUserAge,
   getUserGender,
+  getUser,
   isUserInfoAnswered,
   getUserInfo,
 };

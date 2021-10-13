@@ -1,14 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import styled from 'styled-components';
+import { useSelector } from 'react-redux';
 import ContentsDiagram from './contentsDiagram';
 import OttList from './ottList';
 import PreferenceChart from './preferenceChart';
+import api from '../../api';
+import KeywordCloud from './keywordCloud';
+import { selector } from '../../store/modules';
 
 const ResultPage = () => {
   const [result, setResult] = useState(null);
+  const [wordData, setWordData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const user = useSelector(selector.getUser);
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -16,10 +21,12 @@ const ResultPage = () => {
         setError(null);
         setResult(null);
         setLoading(true);
+        const apiResult = await api.getResults({ user_code: user });
+        setResult(apiResult);
+        const apiData = await api.getWordCloudData({ user_code: user });
+        setWordData(apiData);
 
-        const response = await axios.get('http://localhost:5000/api/result');
-        console.log(`데이터: ${response.data} 💩`);
-        setResult(response.data);
+        console.log(`💩 ${apiData}`);
       } catch (e) {
         setError(e);
       }
@@ -27,31 +34,26 @@ const ResultPage = () => {
     };
 
     fetchResults();
-  }, []);
+  }, [user]);
 
   if (loading) return <div>Loading..</div>;
   if (error) return <div>에러발생</div>;
-  if (!result) return null;
+  if (!result || !wordData) return null;
 
   return (
-    <StyledDiv>
+    <PageWrapper>
       <StyledTitle>분석 결과</StyledTitle>
       <StyledVisualSection>
         <PreferenceChart categories={result.category} />
-        <div>
-          <h3>워드클라우드 받아올 것 💬</h3>
-          <img src={result.word_cloud} alt="" width={300} height={250} />
-        </div>
+        <KeywordCloud data={wordData} />
       </StyledVisualSection>
       <OttList result={result} />
       <ContentsDiagram />
-      추천컨텐츠 <br />
-      가격표
-    </StyledDiv>
+    </PageWrapper>
   );
 };
 
-const StyledDiv = styled.div`
+const PageWrapper = styled.div`
   background: #0f0c1d;
   display: flex;
   flex-direction: column;
@@ -71,27 +73,14 @@ const StyledTitle = styled.span`
   background: linear-gradient(90deg, #ac6aec 0%, #bb7ff5 100%);
   text-align: center;
   border-radius: 10px;
-  width: 240px;
-  height: 62px;
-  font-family: Inter;
+  width: 8em;
+  height: 3em;
+  font-family: 'Inter';
   font-style: normal;
   font-weight: 600;
-  font-size: 20px;
-  line-height: 62px;
+  font-size: 1.2em;
+  line-height: 3em;
   color: #ffffff;
 `;
-
-// const StyledBtn = styled.button`
-//   background: linear-gradient(90deg, #ac6aec 0%, #bb7ff5 100%);
-//   border-radius: 10px;
-//   width: 200px;
-//   height: 70px;
-//   font-family: Inter;
-//   font-style: normal;
-//   font-weight: 600;
-//   font-size: 20px;
-//   line-height: 70px;
-//   color: #ffffff;
-// `;
 
 export default ResultPage;

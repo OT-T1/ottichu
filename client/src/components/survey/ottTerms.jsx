@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import styled from 'styled-components';
 import { actions, selector } from '../../store/modules';
 import RangeBar from '../common/rangeBar';
 
@@ -18,13 +19,14 @@ const OttTerms = () => {
     [],
   );
 
+  // TODO: Debounce 걸기 Saga에서 처리하면 될 듯
   const handleOttTerms = useCallback(
     (e) => dispatch(ACTIONS[e.target.name](e.target.value)),
     [dispatch, ACTIONS],
   );
 
   return (
-    <div>
+    <StyledOttTermsWrapper>
       <RangeBar
         id="ott--price"
         name="price_opt"
@@ -32,6 +34,10 @@ const OttTerms = () => {
         min="0"
         max="15000"
         step="1000"
+        width="50%"
+        height="24px"
+        fontSize="1.5rem"
+        colorType="stylish"
         defaultValue={ottPrice}
         onChange={handleOttTerms}
       />
@@ -42,6 +48,10 @@ const OttTerms = () => {
         min="1"
         max="4"
         step="1"
+        width="50%"
+        height="24px"
+        fontSize="1.5rem"
+        colorType="stylish"
         defaultValue={ottGroupCnt}
         onChange={handleOttTerms}
       />
@@ -52,11 +62,24 @@ const OttTerms = () => {
         min="0"
         max="180"
         step="10"
+        width="50%"
+        height="24px"
+        fontSize="1.5rem"
+        colorType="stylish"
         defaultValue={ottFreeTime}
         onChange={handleOttTerms}
       />
-    </div>
+    </StyledOttTermsWrapper>
   );
 };
+
+const StyledOttTermsWrapper = styled.div`
+  width: 100vw;
+  height: 50vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+`;
 
 export default OttTerms;
