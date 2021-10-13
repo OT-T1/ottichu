@@ -188,12 +188,12 @@ class Contents:
 
     def get_another_10_contents(self, user_updated):
         user_updated_embedded = self.make_user_embedding(
-            user_updated.index.values.tolist(),
+            user_updated["content_code"],
             mecab_data.model_tok,
         )
 
         num_code = len(user_updated)
-        prev_code = user_updated.index.values.tolist()
+        prev_code = user_updated["content_code"].values.tolist()
         similar_contents = mecab_data.model_tok.dv.most_similar(
             user_updated_embedded, topn=num_code + 10
         )
