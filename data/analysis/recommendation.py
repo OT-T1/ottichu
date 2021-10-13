@@ -42,25 +42,18 @@ READ_CONTENT_ACTOR = "SELECT * FROM content_actor"
 READ_CONTENT_DIRECTOR = "SELECT * FROM content_director"
 
 contents = pd.read_sql(SHOW_CONTENTS, db)
-print(contents.head())
+
 all_data = contents
 
 #%%
 PICK_ACTOR = "SELECT * FROM content_actor WHERE content_code=%s"
-# actor = pd.read_sql_query(PICK_ACTOR, db, params=[i])
-# print(', '.join(actor['actor'].tolist()))
 PICK_DIRECTOR = "SELECT * FROM content_director WHERE content_code=%s"
 PICK_GENRE = "SELECT * FROM content_genre WHERE content_code=%s"
 
 
 #%%
 # 결측치 처리 - fillna - 현재 summary에만 64개 결측치 발견
-print(all_data.summary.isnull().sum())
-print(all_data.info())
 all_data = all_data.fillna("")
-print(all_data.info())
-# 포스트그레스?! 벡터 저장?! >> NoSQL >> 웨디스?? 몽고디비?? 
-
 
 #%%
 # 데이터 가져오기 및 전처리
@@ -110,8 +103,10 @@ def get_and_process_data():
 	m = Mecab()
 	mecab_tok = []
 
-	for doc in temp['doc']:
-		words = m.nouns(doc) # 고유명사화 알아보기
+	# 줄거리만 벡터화하도록 다시 수정해 봄  ############
+	for summary in temp['summary']:
+		# words = m.nouns(doc)
+		words = m.nouns(summary) # 고유명사화 알아보기
 		words = ' '.join(words)
 		mecab_tok.append(words)
 
@@ -128,60 +123,10 @@ def get_and_process_data():
 # data 전처리 후 가져오기
 data = get_and_process_data()
 
-
-#%%
-# doc2vec에 필요한 데이터 만들고 저장하기
-def make_doc2vec_data(data, column, tagged=False):
-	data_doc= []
-
-	for tag, doc in zip(data.index, data[column]):  #########
-		doc = doc.split(" ")
-		data_doc.append(([tag], doc))
-
-	if tagged:
-		data = [TaggedDocument(words=text, tags=tag) for tag, text in data_doc]
-		return data
-
-	else:
-		return data_doc
-
-
-
-#%%
-# 벡터 데이터 만들기
-# doc : 필요한 거 전부 문자열로 이어붙인 것
-# mecab_tok : mecab을 통해 형태소 분석한 결과
-# tag: doc2vec model 학습에 사용됨
-# without tag : user embedding, cosine similiarty 구하는 용도
-
-data_doc_tag = make_doc2vec_data(data, 'doc', tagged=True)
-data_doc = make_doc2vec_data(data, 'doc')
-
-data_doc_tok_tag = make_doc2vec_data(data, 'mecab_tok', tagged=True)
-data_doc_tok = make_doc2vec_data(data, 'mecab_tok')
-
-
-#%%
-# print(data_doc_tok_tag[0])
-#%%
-# 모델 만들기 
-# 분석 대상 컨텐츠(doc)를 100차원 벡터로 만들기
-# tok : 형태소 분석기를 적용한 모델이냐 아니냐 : bool data
-
-# def make_doc2vec_models(tagged_data, tok, vector_size=100, window=4, epochs=40, min_count=1, workers=4):
-# 	model = Doc2Vec(tagged_data, vector_size=vector_size, window=window, epochs=epochs, min_count=min_count, workers=workers)
-# 	model.save(f'./model/{tok}_model.doc2vec')
-
-#%%
-# 모델 만들기 - 함수 호출
-
-# make doc2vec models - 스토리지에 모델 파일(120MB;) 업로드 시 이 코드는 불필요
-# make_doc2vec_models(data_doc_tok_tag, tok=True) # 형태소 분석 결과
-
-
 #%%
 # doc2vec models 로드하기
 model_tok = Doc2Vec.load('./model/True_model.doc2vec') ############
+
 
 #%%
 # mecab 형태소 분석한 모델 적용한 유저 임베딩
@@ -190,12 +135,15 @@ model_tok = Doc2Vec.load('./model/True_model.doc2vec') ############
 # data_doc : 벡터 데이터 (안쓰는 걸로 바꿈)
 # model : 모델 데이터
 
+# 유저가 선택한 content_code를 입력받고, 100차원 벡터 데이터를 반환함
 def make_user_embedding(content_code_list, model_tok): #########
 	user_embedding = []
 	
 	for i in content_code_list:
 		try:
-			user_embedding.append(model_tok.dv[i-1])
+			user_embedding.append(model_tok.dv[i-1]) 
+			# model_tok은 배열 상태라 결국 인덱스값으로 조회해야 한다.
+			# 따라서 content_code - 1을 해야 함
 		except:
 			pass
 
@@ -217,13 +165,13 @@ def pre_filter(tastes):
 	category = ' '.join(tastes['category'])
 
 	# DB에서 사용자가 선택한 인덱스를 가져온다
-	# user_code = 1 # 프론트에서 가져올 것
-	# PICK_USER = "SELECT * FROM user_contents WHERE user_code=%s"
-	# user_contents = pd.read_sql_query(PICK_USER, db, params=[user_code])
-	# user_picked = user_contents['content_code'].loc[user_contents['user_code']==user_code].tolist()
+	user_code = 1 # 프론트에서 가져올 것
+	PICK_USER = "SELECT * FROM user_contents WHERE user_code=%s"
+	user_contents = pd.read_sql_query(PICK_USER, db, params=[user_code])
+	user_picked = user_contents['content_code'].loc[user_contents['user_code']==user_code].tolist()
 	
 	# dummy user
-	user_picked = [4]
+	# user_picked = [4]
 
 	prev_user = data.loc[data['content_code'].isin(user_picked)].sort_values(by=['rating'], ascending=False).reset_index()
 
@@ -250,11 +198,7 @@ tastes = {
 
 
 user_prefiltered = pre_filter(tastes)
-
-# print(len(user_prefiltered))
-# print(user_prefiltered)
-# print(user_prefiltered['content_code'].values.tolist())
-
+print(user_prefiltered[['content_code', 'title']])
 
 #%%
 # 처음 10개 작품 목록 받기
@@ -263,20 +207,32 @@ user_prefiltered = pre_filter(tastes)
 
 def get_first_10_contents(user_prefiltered):
 
-	user_updated_embedded = make_user_embedding(user_prefiltered['content_code'][:10].values.tolist(), model_tok)  ########
+	# 유저 임베딩 : 컨텐츠 코드 배열 >> 벡터 데이터로 반환
+	user_updated_embedded = make_user_embedding(user_prefiltered['content_code'].values.tolist(), model_tok)  ########
 
-	# similar_contents는 index를 반환할 수밖에 없다.
-	similar_contents = model_tok.dv.most_similar(user_updated_embedded, topn=10)
-
+	# similar_contents는 배열의 index를 반환한다. 
+	similar_contents = model_tok.dv.most_similar(user_updated_embedded, topn=20)
+	
+	# 혹시 모를 중복 제거
+	similar_contents = list(set(similar_contents))[:10]
+	
+	# 따라서 content_code로 만들기 위해 +1
 	content_codes = [x[0]+1 for x in similar_contents] #########
+	# content_codes = [x[0] for x in similar_contents] #########
 
-	return content_codes ##########
+	result_codes = data.loc[data['content_code'].isin(content_codes)].sort_values(by=['rating'], ascending=False).reset_index()
+
+	result_codes = result_codes['content_code'].values.tolist()
+
+	return result_codes ##########
 
 
 #%%
+# 화면에 띄울 첫번째 10개 컨텐츠 가져오기
 first_10_contents = get_first_10_contents(user_prefiltered)
-print(first_10_contents)
-# print(data.loc[data['content_code'].isin(first_10_contents)])
+# print(first_10_contents)
+# print(data.loc[data['content_code'].isin(first_10_contents)].sort_values(by=['rating'], ascending=False).reset_index())
+
 
 #%%
 # 선호 컨텐츠 입력 받고 사용자 업데이트하기
@@ -302,16 +258,17 @@ print(user_updated)
 # user_updated = 선호 컨텐츠 응답 내용이 추가된 최신 사용자 데이터
 
 def get_another_10_contents(user_updated):
-	# user_updated_embedded = make_user_embedding(user_prefiltered.index.values.tolist(), data_doc_tok, model_tok)
 	user_updated_embedded = make_user_embedding(user_prefiltered['content_code'].values.tolist(), model_tok)  ########
 	
 	num_code = len(user_updated) #########
-	# prev_code = user_updated.index.values.tolist()
 	prev_code = user_updated['content_code'].values.tolist() #######
 
 	similar_contents = model_tok.dv.most_similar(user_updated_embedded, topn=num_code+10)  #######
 
-	new_code = [x[0]+1 for x in similar_contents]  #######
+	temp_code = [x[0]+1 for x in similar_contents]  #######
+
+	new_code = data.loc[data['content_code'].isin(temp_code)].sort_values(by=['rating'], ascending=False).reset_index()
+	new_code = new_code['content_code'].values.tolist()
 
 	another_10_contents = list(set(prev_code + new_code))[:10] ########
 
@@ -321,24 +278,34 @@ def get_another_10_contents(user_updated):
 another_10_contents = get_another_10_contents(user_updated)
 print(another_10_contents)
 
+#%% 
+# 다시 유저 업데이트
+user_updated = update_user(another_10_contents, user_prefiltered)
+print(user_updated['title'])
+
 #%%
-# get result : 결과에 띄울 샹위 1000개 컨텐츠 인덱스 반환
+# get result : 결과에 띄울 샹위 200개 컨텐츠 인덱스 반환
 
 def get_result(user_updated):
 	user_final = make_user_embedding(user_updated['content_code'].values.tolist(), model_tok)  #######
 
-	# 최종 데이터와 유사한 문서 상위 100개를 선정하여, 어느 ott에 더 많은지 알려주기
+	# 최종 데이터와 유사한 문서 상위 200개를 선정하여, 어느 ott에 더 많은지 알려주기
 	final_contents = model_tok.dv.most_similar(user_final, topn=200)
 	
-	final_content_codes = [x[0]+1 for x in final_contents]	
+	final_temp_codes = [x[0]+1 for x in final_contents]	
+	# final_content_codes = [x[0] for x in final_contents]	
 
-	return final_content_codes
+	final_codes = data.loc[data['content_code'].isin(final_temp_codes)].sort_values(by=['rating'], ascending=False).reset_index()
 
-print(get_result(user_updated)[:10])
+	final_codes = final_codes['content_code'].values.tolist()
+
+	return final_codes
 
 #%%
 # 중간 테스트...
-# print(data.loc[data['content_code'].isin(get_result(user_updated)[:10])])
+check = get_result(user_updated)[:10]
+print(data[data['content_code'].isin(check)]['title'])
+
 #%%
 # 어느 ott에 더 많을까? 
 # ott별 사용자 취향 컨텐츠 숫자 집계하기
@@ -356,12 +323,12 @@ def count_by_ott(result):
 
 	return ott_counts
 
-#%%
 # ott 별 집계 결과 얻기
 result = get_result(user_updated)
 count_by_ott(result)
 
 #%%
+# 최종 OTT 추천 받기
 def get_ott_recommendation(result):
 	
 	# netflix_score, tving_score, wavve_score, watcha_score, coupang_score = 0, 0, 0, 0, 0
@@ -389,19 +356,17 @@ def get_ott_recommendation(result):
 
 	return platform
 
-
-#%%
-# 최종 OTT 추천 받기
 print(get_ott_recommendation(result))
 
 
 
 #%%
-# 장르 분포 분석
+# 장르 분포 분석 - 가중치 부여
 
 # result에 담긴 content code를 보고 해당 장르를 가져와서 집계한다
 def get_top_genre(result):
 
+	# GENRE DICT SETTING
 	READ_CONTENT_GENRE = "SELECT * FROM content_genre"
 	genres = pd.read_sql(READ_CONTENT_GENRE, db)
 	unique_genre = genres['genre'].unique().tolist() # 155개
@@ -410,14 +375,19 @@ def get_top_genre(result):
 	for ug in unique_genre:
 		genre_count[ug] = 0
 
-	for content_code in result:
+
+	# WEIGHT
+	weight = [i for i in range(200, 0, -1)]
+
+	for idx, content_code in enumerate(result):
 		PICK_GENRE = "SELECT * FROM content_genre WHERE content_code=%s"
 		content_genres = pd.read_sql_query(PICK_GENRE, db, params=[content_code])
 		genres = content_genres['genre'].tolist()
 		# print(genres)
 		for genre in genres:
 			try:
-				genre_count[genre] += 1
+				# genre_count[genre] += 1  # 단순 집계
+				genre_count[genre] += weight[idx] # 가중치 부여 점수 환산
 			except Exception as e:
 				print(e)
 
@@ -434,3 +404,47 @@ def get_top_genre(result):
 
 print(get_top_genre(result))
 
+
+#%%
+# 장르 분포 분석 - 단순 집계
+
+# result에 담긴 content code를 보고 해당 장르를 가져와서 집계한다
+# def get_top_genre(result):
+
+# 	# GENRE DICT SETTING
+# 	READ_CONTENT_GENRE = "SELECT * FROM content_genre"
+# 	genres = pd.read_sql(READ_CONTENT_GENRE, db)
+# 	unique_genre = genres['genre'].unique().tolist() # 155개
+
+# 	genre_count = dict()
+# 	for ug in unique_genre:
+# 		genre_count[ug] = 0
+
+
+# 	# WEIGHT
+# 	weight = [i for i in range(200, 0, -1)]
+
+# 	for idx, content_code in enumerate(result):
+# 		PICK_GENRE = "SELECT * FROM content_genre WHERE content_code=%s"
+# 		content_genres = pd.read_sql_query(PICK_GENRE, db, params=[content_code])
+# 		genres = content_genres['genre'].tolist()
+# 		# print(genres)
+# 		for genre in genres:
+# 			try:
+# 				genre_count[genre] += 1  # 단순 집계
+# 				# genre_count[genre] += weight[idx] # 가중치 부여 점수 환산
+# 			except Exception as e:
+# 				print(e)
+
+# 	# print(genre_count)
+
+# 	top_genre = sorted(genre_count.items(), reverse=True, key=lambda x: x[1])[:5]
+	
+# 	category = dict()
+# 	for key, val in top_genre:
+# 		category[key] = val
+
+# 	return category
+	
+
+# print(get_top_genre(result))
