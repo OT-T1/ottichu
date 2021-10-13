@@ -1,5 +1,7 @@
 import React, { useCallback } from 'react';
 import styled, { css } from 'styled-components';
+// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+// import { faHeart } from '@fortawesome/free-solid-svg-icons';
 
 const ImageCheckBox = ({
   id,
@@ -35,6 +37,7 @@ const ImageCheckBox = ({
         onClick={handleCheck}
       />
       <img src={url} alt={name} />
+      {/* { && <FontAwesomeIcon icon={faHeart} />} */}
     </StyledImgCheckBox>
   );
 };
@@ -69,6 +72,9 @@ const StyledImgCheckBox = styled.label`
     padding: 0;
     width: 0;
     height: 0;
+    :checked {
+      background: black;
+    }
   }
   & > img {
     width: 100%;

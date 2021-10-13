@@ -37,7 +37,7 @@ const FavoriteContent = () => {
               value={code}
               defaultChecked={code in selectionStorage}
               onClick={handleCheck}
-              info={director}
+              info={director ? director.join('|') : ''}
             />
           ))
         )}

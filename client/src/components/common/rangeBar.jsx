@@ -21,6 +21,7 @@ const RangeBar = ({
     return `${size / 5}${unit}`;
   }, [height]);
 
+  // TODO: 포팅해야댐.
   // const handleMouseDown = useCallback((e) => {}, [unlockStartHandler]);
   // const handleMouseStart = useCallback((e) => {}, [unlockStartHandler]);
   // const handleMouseUp = useCallback((e) => {}, [unlockEndHandler]);
@@ -52,12 +53,17 @@ const RangeBar = ({
         // onTouchEnd={handleMouseEnd}
       />
       <datalist id={`${id}--tickmarks`}>
-        <option value={min} label={min} />
-        <option value={max} label={max} />
+        <Test value={min} label={min} />
+        <Test value={max} label={max} />
       </datalist>
     </StyledRangeBar>
   );
 };
+
+const Test = styled.option`
+  font-size: 100px;
+  color: white;
+`;
 
 const StyledRangeBar = styled.label`
   display: flex;
@@ -236,93 +242,3 @@ const StyledRangeBar = styled.label`
 `;
 
 export default RangeBar;
-
-// & > input {
-//   height: ${(props) => (props.height ? props.height : '22px')};
-//   background-color: transparent;
-//   cursor: pointer;
-
-// -webkit-appearance: none;
-//     width: 50%;
-//     :focus {
-//       outline: none;
-//     }
-//     ::-webkit-slider-runnable-track {
-//       width: 100%;
-//       height: ${(props) => (props.trackSize ? `${props.trackSize}` : '5px')};
-//       box-shadow: 1px 1px 4px #6047ff;
-//       background: #a95398;
-//       border-radius: 50px;
-//       border: 0px solid #000000;
-//     }
-//     ::-webkit-slider-thumb {
-//       -webkit-appearance: none;
-//       box-shadow: 1px 1px 2px #000000;
-//       border: 1px solid #ff45b5;
-//       width: ${(props) => (props.height ? props.height : '22px')};
-//       height: ${(props) => (props.height ? props.height : '22px')};
-//       border-radius: 50px;
-//       background: #ffffff;
-//       transform: translateY(-40%);
-//       :hover {
-//         transform: scale(1.1) translateY(-42%);
-//         box-shadow: 1px 1px 20px #ff45b5;
-//       }
-//     }
-//     :focus::-webkit-slider-runnable-track {
-//       background: #a95398;
-//     }
-//     ::-moz-range-track {
-//       width: 100%;
-//       height: ${(props) => (props.trackSize ? `${props.trackSize}` : '5px')};
-//       cursor: pointer;
-//       box-shadow: 1px 1px 4px #6047ff;
-//       background: #a95398;
-//       border-radius: 50px;
-//       border: 0px solid #000000;
-//     }
-//     ::-moz-range-thumb {
-//       box-shadow: 1px 1px 2px #000000;
-//       border: 1px solid #ff45b5;
-//       width: ${(props) => (props.height ? props.height : '22px')};
-//       height: ${(props) => (props.height ? props.height : '22px')};
-//       border-radius: 50px;
-//       background: #ffffff;
-//       cursor: pointer;
-//     }
-//     ::-ms-track {
-//       width: 100%;
-//       height: ${(props) => (props.height ? props.height : '5px')};
-//       cursor: pointer;
-//       background: transparent;
-//       border-color: transparent;
-//       color: transparent;
-//     }
-//     ::-ms-fill-lower {
-//       background: #a95398;
-//       border: 0px solid #000000;
-//       border-radius: 100px;
-//       box-shadow: 1px 1px 4px #6047ff;
-//     }
-//     ::-ms-fill-upper {
-//       background: #a95398;
-//       border: 0px solid #000000;
-//       border-radius: 100px;
-//       box-shadow: 1px 1px 4px #6047ff;
-//     }
-//     ::-ms-thumb {
-//       margin-top: 1px;
-//       box-shadow: 1px 1px 2px #000000;
-//       border: 1px solid #ff45b5;
-//       width: ${(props) => (props.height ? props.height : '22px')};
-//       height: ${(props) => (props.height ? props.height : '22px')};
-//       border-radius: 50px;
-//       background: #ffffff;
-//       cursor: pointer;
-//     }
-//     :focus::-ms-fill-lower {
-//       background: #a95398;
-//     }
-//     :focus::-ms-fill-upper {
-//       background: #a95398;
-//     }

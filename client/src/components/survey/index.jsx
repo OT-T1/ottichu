@@ -24,6 +24,7 @@ const SurveyPage = () => {
   const isSectionCompleted = useSelector(selector.isSectionCompleted);
   const hasBasicInfoSubmited = useSelector(selector.hasBasicInfoSubmited);
   const hasContentSubmited = useSelector(selector.hasContentSubmited);
+  const user = useSelector(selector.getUser);
   const anchors = useMemo(() => ['1', '2', '3', '4'], []);
   const SETIONS = useMemo(
     () => [
@@ -102,8 +103,8 @@ const SurveyPage = () => {
   }, [history, dispatch, isSectionCompleted, hasContentSubmited]);
 
   const handleRefresh = useCallback(() => {
-    dispatch(actions.reqContentInfo());
-  }, [dispatch]);
+    dispatch(actions.reqContentInfo(user));
+  }, [dispatch, user]);
 
   return (
     <>
@@ -127,6 +128,7 @@ const SurveyPage = () => {
             anchors={anchors}
             controlArrows={false}
             afterRender={movePreviousRecord}
+            normalScrollElements="#directors-option--list, #actors-option--list"
             onLeave={handleLeave('scroll', leaveSection)}
             sectionsColor={['#0F0C1D', '#0F0C1D', '#0F0C1D', '#0F0C1D']}
             render={({ state, fullpageApi }) => (
