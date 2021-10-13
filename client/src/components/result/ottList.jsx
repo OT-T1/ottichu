@@ -15,7 +15,7 @@ const OttList = ({ result }) => {
         {Object.keys(result.platform).map((ottName) => (
           <div>
             <img src={`/images/${ottName}_logo.png`} alt={`${ottName} logo`} />
-            <Ott ottName={result.platform[ottName]} key={Date.now()} />
+            <Ott ottName={result.platform[ottName]} key={ottName} />
           </div>
         ))}
       </StyledDiv>
