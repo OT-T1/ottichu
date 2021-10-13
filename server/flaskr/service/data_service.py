@@ -58,7 +58,7 @@ class Contents:
             )
             t_user_directors = (
                 db.session.query(user_directors)
-                .filter(user_directors == user_code)
+                .filter(user_directors.user_code == user_code)
                 .all()
             )
             t_user_contents = (
@@ -74,7 +74,10 @@ class Contents:
                 tmp.append("TV 프로그램")
 
             user_prefiltered = self.pre_filter(
-                t_user_actors, t_user_directors, tmp, t_user_contents
+                t_actors=t_user_actors,
+                t_directors=t_user_directors,
+                t_category=tmp,
+                t_contents=t_user_contents,
             )
 
             def get_content_data(contents_list):
@@ -116,8 +119,8 @@ class Contents:
 
     def pre_filter(self, t_actors, t_directors, t_category, t_contents):
 
-        sel_director = " ".join([ta.actor for ta in t_actors])
-        sel_actor = " ".join([td.director for td in t_directors])
+        sel_director = " ".join([td.director for td in t_directors])
+        sel_actor = " ".join([ta.actor for ta in t_actors])
         sel_category = " ".join([tc for tc in t_category])
 
         # DB에서 사용자가 선택한 인덱스를 가져온다
@@ -127,7 +130,7 @@ class Contents:
         data = mecab_data.data
         prev_user = (
             data.loc[data["content_code"].isin(sel_contents)]
-            # .sort_values(by=["rating"], ascending=False)
+            .sort_values(by=["rating"], ascending=False)
             .reset_index()
         )
 
@@ -139,11 +142,11 @@ class Contents:
                 )
                 & (data["category"] == f"{sel_category}")
             ]
-            # .sort_values(by=["rating"], ascending=False)
+            .sort_values(by=["rating"], ascending=False)
             .reset_index()
         )
 
-        user = pd.concat([prev_user[:5], user_prefiltered[:5]], ignore_index=True)
+        user = pd.concat([prev_user[:1], user_prefiltered[:10]], ignore_index=True)
 
         return user
 
@@ -163,7 +166,7 @@ class Contents:
 
         result_codes = (
             data.loc[data["content_code"].isin(content_codes)]
-            # .sort_values(by=["rating"], ascending=False)
+            .sort_values(by=["rating"], ascending=False)
             .reset_index()
         )
         result_codes = result_codes["content_code"].values.tolist()
@@ -200,7 +203,7 @@ class Contents:
         data = mecab_data.data
         new_code = (
             data.loc[data["content_code"].isin(temp_code)]
-            # .sort_values(by=["rating"], ascending=False)
+            .sort_values(by=["rating"], ascending=False)
             .reset_index()
         )
         new_code = new_code["content_code"].values.tolist()

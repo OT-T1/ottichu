@@ -28,9 +28,7 @@ class Data:
         content_director = pd.read_sql(READ_CONTENT_DIRECTOR, db)
         content_genre = pd.read_sql(READ_CONTENT_GENRE, db)
 
-        self.data = contents.drop(
-            columns=["rating", "run_time", "released_year"], axis=1
-        )
+        self.data = contents.drop(columns=["run_time", "released_year"], axis=1)
 
         docs = []
         actors = []
