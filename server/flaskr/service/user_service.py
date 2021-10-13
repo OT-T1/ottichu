@@ -48,8 +48,11 @@ class User:
 
     def input_user_contents(data):
         try:
-            for content, user in data["contents"]:
-                user_contents(content, user)
+            user_code = data["user_code"]
+            for content in data["contents"]:
+                new_user_content = user_contents(int(content), int(user_code))
+                db.session.add(new_user_content)
+            db.session.commit()
             return jsonify(result="created"), 201
         except Exception as e:
             print(e)
