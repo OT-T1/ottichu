@@ -5,9 +5,10 @@ import { contentActions } from './contentReducer';
 
 const REQ_CONTENT_INFO = 'content/reqContentInfo';
 
-function* getContent() {
+function* getContent(action) {
   try {
-    const response = yield call(api.getContent);
+    const user = action.payload;
+    const response = yield call(api.getContent, { user_code: user });
     console.log('컨텐츠 정보 응답', response);
     yield put(
       contentActions.resContentInfo(reducerState.success(response.contents)),

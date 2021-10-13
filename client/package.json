@@ -18,6 +18,7 @@
     "eslint-config-airbnb": "^18.2.1",
     "eslint-config-prettier": "^8.3.0",
     "history": "^5.0.1",
+    "package.json": "^2.0.1",
     "react": "^17.0.2",
     "react-chartjs-2": "^3.0.5",
     "react-d3-cloud": "^1.0.5",
@@ -59,7 +60,7 @@
       "import/prefer-default-export": 0,
       "no-param-reassign": 0,
       "linebreak-style": [
-        "error",
+        "warn",
         "unix"
       ]
     },

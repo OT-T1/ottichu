@@ -10,8 +10,7 @@ const AutoComplete = ({
   options,
   onChange,
   onSelect,
-  onFocus,
-  onBlur,
+  // onBlur,
   colorType,
 }) => {
   const optionsRef = useRef();
@@ -45,7 +44,9 @@ const AutoComplete = ({
       }
       if (e.code === 'ArrowUp' || e.code === 'ArrowDown') {
         e.preventDefault();
+        console.log('대상', e);
         const target = navigate(e.code);
+        optionsRef.current.scrollTo({ top: 16, behavior: 'smooth' });
         setOnHighlight(target);
         setKeyword(options[target]);
         return;
@@ -80,6 +81,7 @@ const AutoComplete = ({
 
   const handleClick = useCallback(
     (e) => {
+      console.log('sdfsdf', e);
       if (optionsRef.current === e.target) {
         return;
       }
@@ -89,19 +91,18 @@ const AutoComplete = ({
     [onSelect],
   );
 
-  const handleFocus = useCallback(
-    () => typeof onFocus === 'function' && onFocus(),
-    [onFocus],
-  );
+  // const handleOuterClick = useCallback((e) => {
+  //   console.log('estset', e);
+  // }, []);
 
-  const handleBlur = useCallback(
-    (e) => {
-      if (typeof onBlur === 'function') {
-        onBlur(e.target.name);
-      }
-    },
-    [onBlur],
-  );
+  // const handleBlur = useCallback(
+  //   (e) => {
+  //     if (typeof onBlur === 'function') {
+  //       onBlur(e.target.name);
+  //     }
+  //   },
+  //   [onBlur],
+  // );
 
   // TODO: 너무 조잡하다... 종속성 어떻게 떼내지? 하...
   return (
@@ -117,8 +118,7 @@ const AutoComplete = ({
           onChange={handleChange}
           autoComplete="off"
           colorType={colorType}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
+          // onBlur={handleBlur}
         />
         {options && (
           <ValidOptionList
@@ -151,7 +151,7 @@ const ValidOptionList = React.forwardRef(
       listCnt={options.length}
     >
       {loading ? (
-        <li>Loading...</li>
+        <StyledLoadingMsg>Loading...</StyledLoadingMsg>
       ) : (
         options.map((option, index) => (
           <Option
@@ -169,7 +169,6 @@ const ValidOptionList = React.forwardRef(
 );
 
 const AutoCompleteWrapper = styled.label`
-  margin-top: 10px; // tmp
   display: flex;
   justify-content: space-between;
   & > span:first-child {
@@ -201,8 +200,8 @@ const OptionsWrapper = styled.ul`
   border: 1px solid black;
   border-radius: 10px;
   padding-left: 0;
-  transition: 300ms;
-  z-index: 10;
+  transition: all 500ms;
+  z-index: 99999;
 
   & > svg {
     font-size: 2rem;
@@ -222,6 +221,14 @@ const Option = styled.li`
   :hover {
     cursor: pointer;
   }
+`;
+
+const StyledLoadingMsg = styled.li`
+  width: 100%;
+  min-height: 3rem;
+  background: #322b3f;
+  border: 1px solid black;
+  border-radius: 10px;
 `;
 
 export default AutoComplete;

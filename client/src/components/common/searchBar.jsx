@@ -10,7 +10,6 @@ const SearchBar = ({
   value,
   onKeyDown,
   onChange,
-  onFocus,
   onBlur,
   colorType,
 }) => (
@@ -35,7 +34,6 @@ const SearchBar = ({
       value={value}
       onKeyDown={onKeyDown}
       onChange={onChange}
-      onFocus={onFocus}
       onBlur={onBlur}
       autoComplete="off"
     />

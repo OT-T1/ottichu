@@ -18,7 +18,6 @@ const createApi =
         timeout,
       });
       const normal = /^2[0-9]{2}$/;
-      console.log('sdfsdflsd', response);
       if (!normal.test(response.status)) {
         throw new Error(response.status); // TODO: 에러 메시지를 받는게...?
       }

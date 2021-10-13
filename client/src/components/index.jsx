@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect } from 'react';
 import ReactFullpage from '@fullpage/react-fullpage';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import { actions } from '../store/modules';
+import { actions, selector } from '../store/modules';
 import Intro from './main/intro';
 import Insight from './main/insight';
 
