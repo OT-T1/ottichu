@@ -43,6 +43,5 @@ def create_app(test_config=None):
 
     # 현재 mecab_data를 객체로 저장
     mecab_data.make_data()
-    mecab_data.make_doc2vec_data("mecab_tok", tagged=True)
-    mecab_data.make_doc2vec_data("mecab_tok", tagged=False)
+    mecab_data.close_db()
     return app

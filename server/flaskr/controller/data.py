@@ -8,7 +8,7 @@ data = Blueprint("data", __name__, url_prefix="/api/data")
 def get_recommend_content():
     user_code = request.args.get("user_code")
     contents_service = Contents()
-    return contents_service().get_contents(user_code=user_code)
+    return contents_service.get_contents(user_code=user_code)
 
 
 @data.route("/actors", methods=["GET"])

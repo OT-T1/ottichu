@@ -18,13 +18,11 @@ class Data:
     def __init__(self, db=None):
         self.db = db
         self.data = None
-        self.data_doc_tok_tag = None
-        self.data_doc_tok = None
-        self.model_tok = Doc2Vec.load("./True_content_model.doc2vec")
+        self.model_tok = Doc2Vec.load("./True_model.doc2vec")
         print("init func")
 
     def make_data(self):
-        print("aa")
+        print("make data")
         contents = pd.read_sql(SHOW_CONTENTS, db)
         content_actor = pd.read_sql(READ_CONTENT_ACTOR, self.db)
         content_director = pd.read_sql(READ_CONTENT_DIRECTOR, db)
@@ -84,8 +82,8 @@ class Data:
         m = Mecab()
         mecab_tok = []
 
-        for doc in self.data["doc"]:
-            words = m.nouns(doc)  # 고유명사화 알아보기
+        for summary in self.data["summary"]:
+            words = m.nouns(summary)  # 고유명사화 알아보기
             words = " ".join(words)
             mecab_tok.append(words)
 
@@ -94,20 +92,8 @@ class Data:
         self.data["doc"] = self.data["doc"].astype(str)
         self.data.index.name = "num"
 
-    def make_doc2vec_data(self, column, tagged=False):
-        data_doc = []
-
-        # for tag, doc in zip(data.index, data[column]):
-        for tag, doc in zip(self.data.index, self.data[column]):
-            doc = doc.split(" ")
-            data_doc.append(([tag], doc))
-
-        if tagged:
-            self.data_doc_tok_tag = [
-                TaggedDocument(words=text, tags=tag) for tag, text in data_doc
-            ]
-        else:
-            self.data_doc_tok = data_doc
+    def close_db(self):
+        self.db.close()
 
 
 db = pymysql.connect(

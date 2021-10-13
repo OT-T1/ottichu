@@ -5,6 +5,6 @@ __pycache__
 config.py
 migrations
 mecab-*
-True_content_model.doc2vec
+*.doc2vec
 #client
 node_modules

@@ -4,6 +4,7 @@ from db_connect import db
 from flask import jsonify
 from flaskr.models import (
     actors,
+    content_director,
     contents,
     directors,
     user_actors,
@@ -84,11 +85,16 @@ class Contents:
                         .filter(contents.content_code == int(content))
                         .one()
                     )
+                    t_directors = (
+                        db.session.query(content_director)
+                        .filter(content_director.content_code == int(content))
+                        .all()
+                    )
                     result_contents.append(
                         (
                             t_content.content_code,
                             t_content.title,
-                            t_content.director,
+                            [t_director.director for t_director in t_directors],
                             t_content.s3_img,
                         )
                     )
@@ -119,49 +125,59 @@ class Contents:
         sel_contents = [tc.content_code for tc in t_contents]
 
         data = mecab_data.data
-        prev_user = data.loc[data["content_code"].isin(sel_contents)]
+        prev_user = (
+            data.loc[data["content_code"].isin(sel_contents)]
+            # .sort_values(by=["rating"], ascending=False)
+            .reset_index()
+        )
 
-        user_prefiltered = data.loc[
-            (
-                data["directors"].astype(str).str.contains(f"{sel_director}")
-                | data["actors"].astype(str).str.contains(f"{sel_actor}")
-            )
-            & (data["category"] == f"{sel_category}")
-        ][:]
+        user_prefiltered = (
+            data.loc[
+                (
+                    data["directors"].astype(str).str.contains(f"{sel_director}")
+                    | data["actors"].astype(str).str.contains(f"{sel_actor}")
+                )
+                & (data["category"] == f"{sel_category}")
+            ]
+            # .sort_values(by=["rating"], ascending=False)
+            .reset_index()
+        )
 
-        user = pd.concat([prev_user, user_prefiltered])
+        user = pd.concat([prev_user[:5], user_prefiltered[:5]], ignore_index=True)
 
         return user
 
     def get_first_10_contents(self, user_prefiltered):
 
         user_updated_embedded = self.make_user_embedding(
-            user_prefiltered.index.values.tolist(),
-            mecab_data.data_doc_tok,
+            user_prefiltered["content_code"],
             mecab_data.model_tok,
         )
         similar_contents = mecab_data.model_tok.dv.most_similar(
-            user_updated_embedded, topn=10
+            user_updated_embedded, topn=20
         )
+        similar_contents = list(set(similar_contents))[:10]
 
-        idx = [x[0] for x in similar_contents]
+        content_codes = [x[0] + 1 for x in similar_contents]
+        data = mecab_data.data
 
-        return idx
+        result_codes = (
+            data.loc[data["content_code"].isin(content_codes)]
+            # .sort_values(by=["rating"], ascending=False)
+            .reset_index()
+        )
+        result_codes = result_codes["content_code"].values.tolist()
 
-    def make_user_embedding(self, index_list, data_doc, model):
-        content = []
+        return result_codes
+
+    def make_user_embedding(self, content_code_list, model):
         user_embedding = []
-        for i in index_list:
+        for i in content_code_list:
             try:
-                content.append(data_doc[i - 1][0][0])
+                user_embedding.append(model.dv[i - 1])
             except Exception as e:
                 print("i", i, e)
 
-        for i in content:
-            try:
-                user_embedding.append(model.dv[i - 1])
-            except:
-                pass
         user_embedding = np.array(user_embedding)
         user = np.mean(user_embedding, axis=0)
 
@@ -170,18 +186,25 @@ class Contents:
     def get_another_10_contents(self, user_updated):
         user_updated_embedded = self.make_user_embedding(
             user_updated.index.values.tolist(),
-            mecab_data.data_doc_tok,
             mecab_data.model_tok,
         )
 
-        num_idx = len(user_updated)
-        prev_idx = user_updated.index.values.tolist()
+        num_code = len(user_updated)
+        prev_code = user_updated.index.values.tolist()
         similar_contents = mecab_data.model_tok.dv.most_similar(
-            user_updated_embedded, topn=num_idx + 10
+            user_updated_embedded, topn=num_code + 10
         )
 
-        new_idx = [x[0] for x in similar_contents]
+        temp_code = [x[0] + 1 for x in similar_contents]
 
-        another_10_contents = list(set(prev_idx + new_idx))[:10]
+        data = mecab_data.data
+        new_code = (
+            data.loc[data["content_code"].isin(temp_code)]
+            # .sort_values(by=["rating"], ascending=False)
+            .reset_index()
+        )
+        new_code = new_code["content_code"].values.tolist()
+
+        another_10_contents = list(set(prev_code + new_code))[:10]
 
         return another_10_contents
