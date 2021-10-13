@@ -1,4 +1,4 @@
-import { surveyApi } from './survey';
+import surveyApi from './survey';
 
 const api = {
   ...surveyApi,

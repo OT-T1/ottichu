@@ -1,21 +1,29 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import ReactFullpage from '@fullpage/react-fullpage';
 import { useDispatch, useSelector } from 'react-redux';
+import { useHistory } from 'react-router-dom';
+import styled from 'styled-components';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faRedo } from '@fortawesome/free-solid-svg-icons';
 import StepBar from './stepBar';
 import SectionLayout from './sectionLayout';
 import UserInfo from './userInfo';
-import ContentSection from './content';
 import { actions, selector } from '../../store/modules';
 import PreferenceType from './preferenceType';
-import { handleLeave } from '../../utils';
+import { handleLeave, handleScrollSlide } from '../../utils';
 import OttTerms from './ottTerms';
-// import { reducerState } from '../../utils/reducer';
+import FavoriteContent from './favoriteContent';
+import StyledBtn from '../common/styledBtn';
+
+const STORE_DELAY = 60000;
 
 const SurveyPage = () => {
+  const history = useHistory();
   const dispatch = useDispatch();
   const sectionIndex = useSelector(selector.getSurveySectionIndex);
-  const isSurveyCompleted = useSelector(selector.isSurveyCompleted);
-  const isBasicInfoSubmit = useSelector(selector.isBasicInfoSubmit);
+  const isSectionCompleted = useSelector(selector.isSectionCompleted);
+  const hasBasicInfoSubmited = useSelector(selector.hasBasicInfoSubmited);
+  const hasContentSubmited = useSelector(selector.hasContentSubmited);
   const anchors = useMemo(() => ['1', '2', '3', '4'], []);
   const SETIONS = useMemo(
     () => [
@@ -36,102 +44,187 @@ const SurveyPage = () => {
       },
       {
         id: '0d1813',
-        title: '좋아하는 프로그램 선택 페이지',
-        contents: <ContentSection />,
+        title: '좋아하는 컨텐츠 선택 페이지',
+        contents: <FavoriteContent />,
       },
     ],
     [],
   );
-  // TODO: TEST 코드 => sage에서 백그라운드로 액션 날리면서 처리하게?
-  useEffect(() => {
-    console.log('testsetsetset', sectionIndex);
-    console.log('ㄴㅇㄹㄴㅇㄹㄴ', isSurveyCompleted);
-    const storage = window.localStorage;
-    storage.setItem(
-      'fyott',
-      JSON.stringify({
-        section: 1,
-        slide: 0,
-        age: '10',
-        gender: 'male',
-        categories: {
-          movie: false,
-          tvshow: true,
-          // kMovie: false,
-          // fMovie: false,
-          // kDrama: false,
-          // fDrama: false,
-          // kVariety: false,
-          // fVariety: false,
-          // kAnimation: false,
-          // fAnimation: false,
-          // documentary: false,
-        },
-        directors: {},
-        actors: {},
-        price: 7000,
-        freetime: 100,
-        group: 2,
-      }),
-    );
-  }, [isSurveyCompleted, sectionIndex]);
 
-  // Control Section Scroll & Slide
+  // 일정 주기로 로컬 스토리지에 작성 정보 저장
   useEffect(() => {
-    window.fullpage_api.setAllowScrolling(isSurveyCompleted, 'down');
-    window.fullpage_api.setKeyboardScrolling(isSurveyCompleted, 'down');
-    // TODO: Add Control Section Slide
-  }, [isSurveyCompleted, sectionIndex]);
+    dispatch(
+      actions.registerScheduler(
+        setInterval(() => dispatch(actions.storeSurveyRecord()), STORE_DELAY),
+      ),
+    );
+  }, [dispatch]);
+
+  const movePreviousRecord = useCallback(
+    (anchor) =>
+      anchor !== sectionIndex &&
+      window.fullpage_api.moveTo(anchors[sectionIndex]),
+    [anchors, sectionIndex],
+  );
+
+  // Control Section Scroll
+  useEffect(() => {
+    handleScrollSlide(window.fullpage_api)(isSectionCompleted, 'down');
+  }, [isSectionCompleted]);
 
   const leaveSection = useCallback(
     (destination) => {
-      dispatch(actions.movePage({ section: destination.index, slide: 0 }));
-      if (destination.isLast && !isBasicInfoSubmit) {
+      dispatch(actions.movePage(destination.index));
+      if (destination.isLast && !hasBasicInfoSubmited) {
         // TODO: Add submit action
-        console.log('제출!!!!!!!!!!!!!!!!!', isBasicInfoSubmit);
-        dispatch(actions.requestSubmitBasic());
+        dispatch(actions.reqSubmitBasic());
       }
     },
-    [dispatch, isBasicInfoSubmit],
+    [dispatch, hasBasicInfoSubmited],
   );
 
-  const leaveSlide = useCallback((section, destination) => {
-    // TODO: 슬라이드 작~~~~업
-    console.log(section, destination);
-  }, []);
+  const handleNext = useCallback(() => {
+    if (!isSectionCompleted) {
+      // TODO: 응답 요청 메시지 출력하도록!
+      return;
+    }
+    dispatch(actions.reqSubmitContent({ result: false }));
+  }, [dispatch, isSectionCompleted]);
 
-  const handleSubmitChoice = useCallback((e) => {
-    e.preventDefault();
-    console.log(e.target.value);
-  }, []);
+  const moveResultPage = useCallback(() => {
+    if (!hasContentSubmited && !isSectionCompleted) {
+      // TODO: 응답 요청 메시지 출력하도록!
+      return;
+    }
+    // TODO: Request result to Api url
+    dispatch(actions.reqSubmitContent({ result: true }));
+    history.replace('/result');
+  }, [history, dispatch, isSectionCompleted, hasContentSubmited]);
+
+  const handleRefresh = useCallback(() => {
+    dispatch(actions.reqContentInfo());
+  }, [dispatch]);
 
   return (
-    <main role="main">
-      <StepBar anchors={anchors} />
-      <form onSubmit={handleSubmitChoice}>
-        <ReactFullpage
-          // licenseKey=""
-          anchors={anchors}
-          onLeave={handleLeave('scroll', leaveSection)}
-          onSlideLeave={handleLeave('slide', leaveSlide)}
-          render={({ state, fullpageApi }) => (
-            <ReactFullpage.Wrapper>
-              {SETIONS.map(({ id, title, contents }, index) => (
-                <SectionLayout
-                  key={id}
-                  index={index}
-                  title={title}
-                  state={state}
-                  fullpageApi={fullpageApi}
-                  contents={contents}
-                />
-              ))}
-            </ReactFullpage.Wrapper>
-          )}
-        />
-      </form>
-    </main>
+    <>
+      <StyledHeader hidden={sectionIndex !== SETIONS.length - 1}>
+        <RefreshButton type="button" onClick={handleRefresh}>
+          <FontAwesomeIcon icon={faRedo} color="white" />
+        </RefreshButton>
+      </StyledHeader>
+      <main role="main">
+        <StyledStepBarWrapper>
+          <StepBar
+            width="25px"
+            height="70vh"
+            anchors={['#1', '#2', '#3', '#4']}
+          />
+        </StyledStepBarWrapper>
+        <div role="form">
+          <ReactFullpage
+            // licenseKey=""
+            // fixedElements=".testbtn"
+            anchors={anchors}
+            controlArrows={false}
+            afterRender={movePreviousRecord}
+            onLeave={handleLeave('scroll', leaveSection)}
+            sectionsColor={['#0F0C1D', '#0F0C1D', '#0F0C1D', '#0F0C1D']}
+            render={({ state, fullpageApi }) => (
+              <ReactFullpage.Wrapper>
+                {SETIONS.map(({ id, title, contents }, index) => (
+                  <SectionLayout
+                    key={id}
+                    index={index}
+                    title={title}
+                    state={state}
+                    fullpageApi={fullpageApi}
+                    contents={contents}
+                  />
+                ))}
+              </ReactFullpage.Wrapper>
+            )}
+          />
+          <StyledBtnWrapper hidden={sectionIndex !== SETIONS.length - 1}>
+            <StyledBtn
+              type="button"
+              text="Result"
+              onClick={moveResultPage}
+              colorType="stylish"
+            />
+            <StyledBtn
+              type="button"
+              text="Next"
+              onClick={handleNext}
+              colorType="stylish"
+            />
+          </StyledBtnWrapper>
+        </div>
+      </main>
+    </>
   );
 };
+
+const StyledHeader = styled.header`
+  position: fixed;
+  text-align: right;
+  line-height: 20vh;
+  width: 100%;
+  height: 20vh;
+  z-index: 10;
+  animation: 2s ease-in-out normal fadein;
+  @keyframes fadein {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+`;
+
+const RefreshButton = styled.button`
+  cursor: pointer;
+  outline: 0;
+  border: 0;
+  background: none;
+  margin-right: 8vw;
+  font-size: 30px;
+  :hover {
+    transform: scale(1.1);
+  }
+`;
+
+const StyledStepBarWrapper = styled.aside`
+  display: flex;
+  align-items: center;
+  position: fixed;
+  left: 7%;
+  width: 25px;
+  height: 100%;
+  z-index: 1;
+`;
+
+const StyledBtnWrapper = styled.div`
+  width: 100%;
+  height: 20vh;
+  text-align: center;
+  position: fixed;
+  line-height: 20vh;
+  bottom: 0;
+  animation: 2s ease-in-out normal fadein;
+  @keyframes fadein {
+    // 임시
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  & > button {
+    margin: 0 3vw;
+  }
+`;
 
 export default SurveyPage;
