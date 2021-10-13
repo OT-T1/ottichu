@@ -9,6 +9,7 @@ import Insight from './main/insight';
 const MainPage = () => {
   const history = useHistory();
   const dispatch = useDispatch();
+  const sectionIndex = useSelector(selector.getSurveySectionIndex);
 
   const scrollDownHander = () => {
     console.log('scroll');
@@ -25,23 +26,23 @@ const MainPage = () => {
 
   const clickHandler = useCallback(() => {
     // Check data in local storage
-    const record = window.localStorage.getItem('fyott');
+    const record = window.localStorage.getItem('ottichu');
     if (
       record &&
       window.confirm(
         '이전에 작성하신 기록이 존재합니다.\r\n이어서 진행하시겠습니까?',
       )
     ) {
-      dispatch(actions.requestLoad(record));
-      console.log(history);
-      return;
+      dispatch(actions.loadPreviousRecord(record));
+      // console.log(history);
+      // return;
+    } else {
+      window.localStorage.removeItem('ottichu');
     }
 
     // TODO: 히스토리 넣어도 여기 왜오니
-    console.log('돌아가!!!!!!');
-    window.localStorage.removeItem('fyott');
-    history.push('/survey#1');
-  }, [dispatch, history]);
+    history.push(`/survey#${sectionIndex + 1}`);
+  }, [dispatch, history, sectionIndex]);
 
   return (
     <main role="main">

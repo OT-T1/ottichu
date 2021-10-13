@@ -4,7 +4,7 @@ const BASE_URL = 'http://localhost:5000/api';
 const createApi =
   (baseURL) =>
   (method) =>
-  (timeout = 3000) =>
+  (timeout = 1000) =>
   (url) =>
   async (data) => {
     try {
@@ -17,10 +17,12 @@ const createApi =
         data: method !== 'get' ? data : {},
         timeout,
       });
-      if (response.status !== 200) {
+      const normal = /^2[0-9]{2}$/;
+      console.log('sdfsdflsd', response);
+      if (!normal.test(response.status)) {
         throw new Error(response.status); // TODO: 에러 메시지를 받는게...?
       }
-      return response.data; // TODO: data를 떤질지 말지 결정!, 응답으로 컨텐츠를 받아오면 될듯!
+      return response.data;
     } catch (e) {
       throw new Error(e);
     }

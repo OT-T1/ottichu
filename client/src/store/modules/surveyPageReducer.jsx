@@ -1,18 +1,17 @@
 import { createSlice, createSelector } from '@reduxjs/toolkit';
 import { reducerState } from '../../utils/reducer';
+import { contentSelector } from './contentReducer';
 import { ottTermsSelector } from './ottTermsReducer';
 import { preferenceSelector } from './preferenceReducer';
 import { userSelector } from './userReducer';
 
 const initialState = {
+  schedulerId: null,
   isLoading: false,
   sectionIndex: 0,
-  slideIndex: 0,
-  directors: reducerState.initial([]),
-  actors: reducerState.initial([]),
   submitLog: {
     basic: reducerState.initial(false),
-    content: reducerState.initial([false, false, false, false, false]),
+    content: reducerState.initial(false),
   },
 };
 
@@ -20,71 +19,96 @@ const surveySlice = createSlice({
   name: 'survey',
   initialState,
   reducers: {
-    requestLoad() {},
-    requestSubmitBasic() {},
-    isDataLoading(state, action) {
-      state.isLoading = action.payload;
+    registerScheduler(state, action) {
+      state.schedulerId = action.payload;
+    },
+    clearScheduler(state) {
+      clearTimeout(state.schedulerId);
+    },
+    storeSurveyRecord() {},
+    loadPreviousRecord(state) {
+      state.isLoading = true;
+    },
+    finishRecordLoad(state, action) {
+      const { section, basicSubmitLog, contentSubmitLog } = action.payload;
+      state.sectionIndex = section;
+      state.submitLog.basic.data = basicSubmitLog;
+      state.submitLog.content.data = contentSubmitLog;
+      state.isLoading = false;
     },
     movePage(state, action) {
-      const { section, slide } = action.payload;
-      state.sectionIndex = section;
-      state.slideIndex = slide;
+      state.sectionIndex = action.payload;
     },
-    loadDirectors(state, action) {
-      state.directors.data.concat(action.payload); // TODO: Need fix
-    },
-    loadActors(state, action) {
-      state.actors.data.concat(action.payload); // TODO: Need fix
-    },
-    submitBasicInfo(state, action) {
-      const { loading, data, error } = action.payload;
-      // TODO: 이후 api 호출과 관련된 리듀서들을 어떻게 함수화 시켜서 재사용할지 아직 감이 안온다... 일단, 맨들고 생각하기!
-      if (loading) {
-        return;
+    clearBasicSubmitRecord(state) {
+      if (state.submitLog.basic.data) {
+        state.submitLog.basic.data = false;
       }
+    },
+    reqSubmitBasic(state) {
+      state.submitLog.basic = reducerState.loading(false);
+    },
+    resSubmitBasic(state, action) {
+      const { loading, data, error } = action.payload;
+      state.submitLog.basic.loading = loading;
       state.submitLog.basic.data = !!data;
       state.submitLog.basic.error = error;
     },
-    // submitFavoriteContent(state, action) {},
+    reqSubmitContent(state) {
+      state.submitLog.content = reducerState.loading(
+        state.submitLog.content.data,
+      );
+    },
+    resSubmitContent(state, action) {
+      const { loading, data, error } = action.payload;
+      state.submitLog.content.loading = loading;
+      state.submitLog.content.data = !!data || state.submitLog.content.data;
+      state.submitLog.content.error = error;
+    },
   },
 });
 
+const getSchedulerId = (state) => state.survey.schedulerId;
 const getSurveyPageStatus = (state) => state.survey.isLoading;
 const getSurveySectionIndex = (state) => state.survey.sectionIndex;
-const getSurveySlideIndex = (state) => state.survey.slideIndex;
-// TODO: Add get directors & actors
-const isBasicInfoSubmit = (state) => !!state.survey.submitLog.basic.data;
-const getSubmitLogOfContent = (state) => state.survey.submitLog.content.data;
+const hasBasicInfoSubmited = (state) => !!state.survey.submitLog.basic.data;
+const hasContentSubmited = (state) => state.survey.submitLog.content.data;
 
 const getSurveySectionState = createSelector(
   [
     userSelector.isUserInfoAnswered,
     preferenceSelector.isPreferenceAnswered,
     ottTermsSelector.isOttTermsAnswered,
+    contentSelector.isContentAnswered,
   ],
-  (user, preference, ottTerms) => [
-    [user],
-    [preference],
-    [ottTerms],
-    [false, false, false, false],
+  (user, preference, ottTerms, content) => [
+    user,
+    preference,
+    ottTerms,
+    content,
   ],
 );
-const isSlideSubmit = (slide) =>
-  createSelector([getSubmitLogOfContent], (submitLog) => !!submitLog[slide]);
-const isSurveyCompleted = createSelector(
-  [getSurveySectionIndex, getSurveySlideIndex, getSurveySectionState],
-  (section, slide, state) => state[section][slide],
+const isSectionCompleted = createSelector(
+  [getSurveySectionIndex, getSurveySectionState],
+  (section, state) => state[section],
+);
+const getSurveyInfo = createSelector(
+  [getSurveySectionIndex, hasBasicInfoSubmited, hasContentSubmited],
+  (sectionIndex, basicSubmitLog, contentSubmitLog) => ({
+    section: sectionIndex,
+    'basic-submit': basicSubmitLog,
+    'content-submit': contentSubmitLog,
+  }),
 );
 
 export const surveyActions = surveySlice.actions;
 export const surveySelector = {
+  getSchedulerId,
   getSurveyPageStatus,
   getSurveySectionIndex,
-  getSurveySlideIndex,
-  getSubmitLogOfContent,
+  hasBasicInfoSubmited,
   getSurveySectionState,
-  isSurveyCompleted,
-  isBasicInfoSubmit,
-  isSlideSubmit,
+  isSectionCompleted,
+  hasContentSubmited,
+  getSurveyInfo,
 };
 export default surveySlice.reducer;
