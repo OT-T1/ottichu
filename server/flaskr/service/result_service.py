@@ -74,3 +74,15 @@ class Result:
         }
 
         return jsonify(category=category, platform=platform), 200
+
+    def get_wordcloud(user_code):
+        recom = Recommendation()
+        data_recom, _ = recom.get_user_data(user_code)
+        result = recom.get_recom_result(data_recom)
+        tokens = recom.for_wordcloud(result)
+
+        token_cnt = Counter(tokens.split())
+        for word in ["그", "것", "이"]:
+            token_cnt.pop(word)
+
+        return jsonify(words=token_cnt.most_common(300)), 200
