@@ -15,9 +15,3 @@ def post_user_input():
 def patch_user_content():
     data = request.json
     return User.input_user_contents(data=data)
-
-
-# 결과 데이터
-@user.route("/result", methods=["GET"])
-def get_user_result():
-    return None
