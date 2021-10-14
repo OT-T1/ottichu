@@ -16,3 +16,14 @@ body {
   /* background-color: red; */
   color: white;
 }
+
+@font-face {
+  font-family: 'Shadows Into Light';
+  src: local('Shadows Into Light'),
+    url('./assets/fonts/ShadowsIntoLight-Regular.ttf') format('truetype')
+      url('./assets/fonts/ShadowsIntoLight-Regular.woff') format('woff')
+      url('./assets/fonts/ShadowsIntoLight-Regular.eot')
+      format('embedded-opentype');
+  font-weight: 400;
+  font-style: normal;
+}

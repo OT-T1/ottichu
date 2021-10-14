@@ -11,7 +11,6 @@ const SectionLayout = ({ title, state, fullpageApi, contents }) => (
 
 export default SectionLayout;
 
-// 임시 스타일링
 const StyledSection = styled.fieldset`
   text-align: center;
   border: none;
@@ -20,7 +19,6 @@ const StyledSection = styled.fieldset`
   color: white;
 `;
 
-// 임시 section에 적용이 안됨 ㅠ
 const StyledLegend = styled.legend`
   font-size: 0;
 `;

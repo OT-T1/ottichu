@@ -27,11 +27,11 @@ const StepBar = ({ width, height, anchors }) => {
       {anchors &&
         anchors.map((step, index) => (
           <StyledStep
+            key={step}
             last={last === index}
             width={stepWidth}
             lineHeight={lineHeight}
             completed={sectionsState[index]}
-            key={step}
           />
         ))}
     </StyledStepBar>
@@ -51,8 +51,35 @@ const StyledStep = styled.div`
   width: ${(props) => `${props.width}px`};
   height: ${(props) => `${props.width}px`};
   border-radius: 50%;
-  background: ${(props) =>
-    props.completed ? 'linear-gradient(#4a4bf8, #ec58d4)' : 'white'};
+  background: white;
+
+  ${(props) =>
+    props.completed &&
+    css`
+      background: hsla(193, 90%, 55%, 1);
+
+      background: linear-gradient(
+        135deg,
+        hsla(193, 90%, 55%, 1) 0%,
+        hsla(280, 95%, 57%, 1) 100%
+      );
+
+      background: -moz-linear-gradient(
+        135deg,
+        hsla(193, 90%, 55%, 1) 0%,
+        hsla(280, 95%, 57%, 1) 100%
+      );
+
+      background: -webkit-linear-gradient(
+        135deg,
+        hsla(193, 90%, 55%, 1) 0%,
+        hsla(280, 95%, 57%, 1) 100%
+      );
+
+      filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#26C5F3", endColorstr="#B429F9", GradientType=1 );
+      border: solid 2px #00e1ff;
+    `}
+
   ${(props) =>
     !props.last &&
     css`
@@ -68,5 +95,6 @@ const StyledStep = styled.div`
       }
     `}
 `;
-
+// ${(props) =>
+// props.completed ? 'linear-gradient(#4a4bf8, #ec58d4)' : 'white'}; */
 export default StepBar;

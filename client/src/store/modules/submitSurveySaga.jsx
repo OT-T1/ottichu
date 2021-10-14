@@ -11,7 +11,7 @@ import { reducerState } from '../../utils/reducer';
 import { contentActions, contentSelector } from './contentReducer';
 import { ottTermsSelector } from './ottTermsReducer';
 import { preferenceSelector } from './preferenceReducer';
-import { surveyActions } from './surveyPageReducer';
+import { surveyActions, surveySelector } from './surveyPageReducer';
 import { userActions, userSelector } from './userReducer';
 
 const DATA_TYPE = Object.freeze({
@@ -33,7 +33,10 @@ const REQ_SUBMIT_BASIC_INFO = 'survey/reqSubmitBasic';
 const REQ_SUBMIT_CONTENT = 'survey/reqSubmitContent';
 
 function* clearBasicSubmitRecord() {
-  yield put(surveyActions.clearBasicSubmitRecord());
+  const submitBasic = yield select(surveySelector.hasBasicInfoSubmited);
+  if (submitBasic) {
+    yield put(surveyActions.clearBasicSubmitRecord());
+  }
 }
 
 function* createSubmitData() {
@@ -83,7 +86,6 @@ function* submitContent(action) {
     });
     console.log('컨텐츠 제출 응답', response);
     yield put(surveyActions.resSubmitContent(reducerState.success(true)));
-    yield put(contentActions.clearSelectionStorage());
     if (!result) {
       yield put(contentActions.reqContentInfo(user));
     } else {
