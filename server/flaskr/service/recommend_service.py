@@ -7,6 +7,7 @@ from db_connect import db
 from flaskr.models import (
     content_genre,
     genres,
+    ott_infos,
     user_actors,
     user_contents,
     user_directors,
@@ -224,7 +225,7 @@ class Recommendation:
     def for_wordcloud(self, result):
         try:
             # 워드클라우드에 입력되어야 할 토큰이(단어가) 더 많아야 하면 val을 조정하기
-            val = 30
+            val = 200
             tokens = []
             for content_code in result[:val]:
                 token = str(
@@ -378,4 +379,50 @@ class Recommendation:
 
         except Exception as e:
             print("make embedding", e)
+            return False
+
+    def get_price_info(self, ott, user_code):
+        def get_best_price(target_price, monthly_fee):
+            minimum_fee = max(monthly_fee)
+            best_price = 0
+
+            for fee in monthly_fee:
+                cal = fee - target_price
+                if cal < minimum_fee:
+                    minimum_fee = cal
+                    best_price = fee
+
+            return best_price
+
+        try:
+            target_user = (
+                db.session.query(users).filter(users.user_code == user_code).one()
+            )
+            target_price = target_user.ott_price // target_user.member_cnt
+
+            target_ott_sheet = (
+                db.session.query(ott_infos).filter(ott_infos.ott_name == ott).all()
+            )
+            monthly_fee = [ott_sheet.price for ott_sheet in target_ott_sheet]
+            best_price = get_best_price(target_price, monthly_fee)
+
+            best_plan = list(filter(lambda x: x.price == best_price, target_ott_sheet))[
+                0
+            ].plan
+
+            best_quality = list(
+                filter(lambda x: x.price == best_price, target_ott_sheet)
+            )[0].quality
+
+            price_info = {
+                "plan": best_plan,
+                "price": best_price,
+                "quality": best_quality,
+                "people_number": target_user.member_cnt,
+                "imgurl": target_ott_sheet[0].imgurl,
+            }
+
+            return price_info
+        except Exception as e:
+            print("get_price_info", e)
             return False
