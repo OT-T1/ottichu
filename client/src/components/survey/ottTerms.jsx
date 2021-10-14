@@ -31,15 +31,17 @@ const OttTerms = () => {
         id="ott--price"
         name="price_opt"
         label="OTT 서비스 희망 가격"
+        required
         min="0"
         max="15000"
         step="1000"
+        unit="원"
         width="50%"
         height="24px"
         fontSize="1.5rem"
         colorType="stylish"
-        defaultValue={ottPrice}
-        onChange={handleOttTerms}
+        value={ottPrice}
+        onInput={handleOttTerms}
       />
       <RangeBar
         id="ott--group"
@@ -48,26 +50,29 @@ const OttTerms = () => {
         min="1"
         max="4"
         step="1"
+        unit="명"
         width="50%"
         height="24px"
         fontSize="1.5rem"
         colorType="stylish"
-        defaultValue={ottGroupCnt}
-        onChange={handleOttTerms}
+        value={ottGroupCnt}
+        onInput={handleOttTerms}
       />
       <RangeBar
         id="ott--freetime"
         name="freetime_opt"
         label="여가 시간"
+        required
         min="0"
         max="180"
         step="10"
+        unit="분"
         width="50%"
         height="24px"
         fontSize="1.5rem"
         colorType="stylish"
-        defaultValue={ottFreeTime}
-        onChange={handleOttTerms}
+        value={ottFreeTime}
+        onInput={handleOttTerms}
       />
     </StyledOttTermsWrapper>
   );

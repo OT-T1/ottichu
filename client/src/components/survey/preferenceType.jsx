@@ -52,13 +52,15 @@ const PreferenceType = ({ fullpageApi }) => {
   );
 
   const handleDeleteAD = useCallback(
-    (e) =>
+    (e) => {
+      console.log(e.target);
       dispatch(
         actions.deleteActorDirector({
           type: e.target.dataset.type,
           name: e.target.dataset.name,
         }),
-      ),
+      );
+    },
     [dispatch],
   );
 
@@ -155,7 +157,10 @@ const PreferenceType = ({ fullpageApi }) => {
                   name={actor}
                   data-type="actors"
                   data-name={actor}
-                >{`#${actor}`}</li>
+                >
+                  {`${actor} `}
+                  <FontAwesomeIcon icon={faTimesCircle} />
+                </li>
               ))}
           </StyledSelectedListWrapper>
         </StyledAutoCompleteWrapper>
@@ -212,7 +217,7 @@ const StyledSelectedListWrapper = styled.ul`
   margin: 0;
   padding: 0;
   text-align: justify;
-  font-size: 1.2rem;
+  font-size: 1rem;
   & > li {
     display: inline-block;
     background: #a0a0a060;
