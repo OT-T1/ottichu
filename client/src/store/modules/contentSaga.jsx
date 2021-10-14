@@ -10,7 +10,10 @@ function* getContent(action) {
     const user = action.payload;
     const history = yield select(contentSelector.getContentHistory);
     console.log('호잇!', history);
-    const response = yield call(api.getContent, { user_code: user, history });
+    const response = yield call(api.getContent, {
+      user_code: user,
+      history: history.join(','),
+    });
     console.log('컨텐츠 정보 응답', response);
     yield put(
       contentActions.resContentInfo(reducerState.success(response.contents)),

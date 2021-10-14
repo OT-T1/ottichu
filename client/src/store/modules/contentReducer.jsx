@@ -11,11 +11,12 @@ const contentSlice = createSlice({
   name: 'content',
   initialState,
   reducers: {
-    clearSelectionStorage(state) {
-      state.selectedContent = {};
-    },
     reqContentInfo(state) {
-      state.history = state.history.concat(Object.keys(state.selectedContent));
+      if (state.contentList.data) {
+        state.history = state.history.concat(
+          state.contentList.data.map(([code]) => code),
+        );
+      }
       state.selectedContent = {};
       state.contentList = reducerState.loading(state.contentList);
     },
