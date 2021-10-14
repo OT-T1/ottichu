@@ -1,4 +1,5 @@
 import re
+import time
 
 import numpy as np
 import pandas as pd
@@ -59,13 +60,21 @@ class Recommendation:
             else:
                 first = False
 
-            return tastes, first
+            return (tastes, first)
         except Exception as e:
             print("get_user_data", e)
             return False
 
-    def get_first_contents(self, tastes):
+    def get_first_contents(self, tastes, history_codes):
         try:
+            # 선택한 감독과 배우가 둘다 없다면
+            if len(tastes["actors"]) == 0 and len(tastes["directors"] == 0):
+                tastes["actors"] = ["이정재"]  # 한 달 간 가장 언급 많이 된 배우
+                tastes["directors"] = ["봉준호"]
+
+            # prefilter 부분 : 감독, 배우 입력 값으로 해당하는 컨텐츠 코드 가져오기
+
+            # 1) direcctor vector 생성 후 배우별 대표작 뽑기
             director_contents_codes = self.get_person_codes(
                 tastes, "directors", mecab_data.model_director_tok
             )
@@ -74,75 +83,81 @@ class Recommendation:
                 tastes, "actors", mecab_data.model_actor_tok
             )
 
+            # 감독, 배우 컨텐츠 코드 모자라니까 더 만드는 부분(new)
             directors_other_codes = self.get_other_codes(
                 director_contents_codes, mecab_data.model_director_tok
+            ) + self.get_similar_codes(
+                director_contents_codes, 2, mecab_data.model_director_tok
             )
             actors_other_codes = self.get_other_codes(
                 actor_contents_codes, mecab_data.model_actor_tok
+            ) + self.get_similar_codes(
+                actor_contents_codes, 2, mecab_data.model_actor_tok
             )
-            length = min(len(directors_other_codes), len(actors_other_codes))
 
-            result = director_contents_codes + actor_contents_codes
+            d_codes = director_contents_codes + directors_other_codes
+            a_codes = actor_contents_codes + actors_other_codes
 
-            for i in range(length):
-                result.append(directors_other_codes[i]) if directors_other_codes[
-                    i
-                ] not in result else result
-                result.append(actors_other_codes[i]) if actors_other_codes[
-                    i
-                ] not in result else result
-
-            if len(result) < 10:
-                more_directors_codes = self.get_other_codes(
-                    directors_other_codes, mecab_data.model_director_tok
-                )
-                more_actors_codes = self.get_other_codes(
-                    actors_other_codes, mecab_data.model_actor_tok
-                )
-                result = director_contents_codes + actor_contents_codes
-
-                for i in range(length):
-                    result.append(more_directors_codes[i]) if more_directors_codes[
-                        i
-                    ] not in result else result
-                    result.append(more_actors_codes[i]) if more_actors_codes[
-                        i
-                    ] not in result else result
-
-            return result
-        except Exception as e:
-            print("get_first_10_contents", e)
-            return False
-
-    def get_other_10_contents(self, tastes):
-        try:
-            skip_codes = []
-
-            new_codes = self.get_other_codes(tastes["contents"], mecab_data.model_tok)
-            rest_codes = self.get_first_contents(tastes)[10:]
+            length = min(len(d_codes), len(a_codes))
 
             result = []
 
-            for nc in new_codes:
-                if nc not in skip_codes and nc not in result:
-                    result.append(nc)
+            for d, c in zip(d_codes[:length], a_codes[:length]):
+                if d not in history_codes and d not in result:
+                    result.append(d)
+                if c not in history_codes and c not in result:
+                    result.append(c)
 
-            more_codes = self.get_other_codes(result, mecab_data.model_tok)
+            more_directors_codes = self.get_other_codes(
+                directors_other_codes, mecab_data.model_director_tok
+            )
+            more_actors_codes = self.get_other_codes(
+                actors_other_codes, mecab_data.model_actor_tok
+            )
 
-            for mc in more_codes:
-                if mc not in skip_codes and mc not in result:
-                    result.append(mc)
+            m_len = min(len(more_directors_codes), len(more_actors_codes))
 
-            for rc in rest_codes:
-                if rc not in skip_codes and rc not in result:
-                    result.append(rc)
+            while len(result) < 10:
+                for j in range(m_len):
+                    d_code = more_directors_codes[j]
+                    a_code = more_actors_codes[j]
+                    if d_code not in history_codes and d_code not in result:
+                        result.append(d_code)
+                    if a_code not in history_codes and a_code not in result:
+                        result.append(a_code)
 
-            more_more_codes = self.get_other_codes(more_codes, mecab_data.model_tok)
-            result = new_codes + rest_codes + more_codes + more_more_codes
-
-            return result[:10]
+            return result  # content_codes
         except Exception as e:
-            print("get_another_10_contents", e)
+            print("get_first_contents", e)
+            return False
+
+    def get_other_10_contents(self, tastes, history_codes):
+        try:
+            user_picked_codes = tastes["contents"]
+            result = []
+
+            i = 1
+            len_n = 0
+            len_r = 10
+            while len(result) < 10:
+                new_codes = self.get_similar_codes(
+                    user_picked_codes, i, mecab_data.model_tok
+                )[len_n:]
+                if len_r > 0:
+                    rest_codes = self.get_first_contents(tastes, history_codes)[len_r:]
+                else:
+                    rest_codes = []
+                temp = new_codes + rest_codes
+                for t in temp:
+                    if t not in history_codes and t not in result:
+                        result.append(t)
+                len_n = len(new_codes)
+                len_r = len(rest_codes) - 10 * i
+                i += 1
+
+            return result[:10]  ### content_codes
+        except Exception as e:
+            print("get_other_10_contents", e)
             return False
 
     def get_result(self, final_codes):
@@ -218,9 +233,7 @@ class Recommendation:
                     .values
                 )
                 tokens.append(token)
-
             tokens = " ".join(tokens).replace("[", "").replace("]", "").replace("'", "")
-
             return tokens
         except Exception as e:
             print("for_wordcloud", e)
@@ -231,7 +244,7 @@ class Recommendation:
             result = []
             for code in content_codes:
                 code_vector = self.make_embedding([code], mecab_data.model_tok)
-                similar_codes = model.dv.most_similar(code_vector, topn=n)
+                similar_codes = model.dv.most_similar(code_vector, topn=n + 1)
                 result_content_codes = [x[0] + 1 for x in similar_codes[1:]]
                 result += result_content_codes
 

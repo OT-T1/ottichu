@@ -1,8 +1,7 @@
-from collections import Counter, defaultdict
+from collections import Counter
 
 from db_connect import db
 from flask import jsonify
-from flaskr.models import content_genre, contents
 from flaskr.service.recommend_service import Recommendation
 
 
@@ -13,9 +12,6 @@ class Result:
 
         top_platform = recom.get_ott_recommendation(result_data["contents"])
         top_genre = recom.get_top_genre(result_data["contents"])
-
-        print(type(top_platform))
-        print(top_platform)
 
         total_genre_sum = sum(top_genre.values())
         for key, val in top_genre.items():
@@ -36,9 +32,7 @@ class Result:
     def get_wordcloud(user_code):
         recom = Recommendation()
         result_data, _ = recom.get_user_data(user_code)
-        result = recom.get_ott_recommendation(result_data["contents"])
-        tokens = recom.for_wordcloud(result)
-
+        tokens = recom.for_wordcloud(result_data["contents"])
         token_cnt = Counter(tokens.split())
         for word in ["그", "것", "이"]:
             try:
