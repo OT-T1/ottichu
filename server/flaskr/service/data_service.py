@@ -48,15 +48,15 @@ class Contents:
     def get_contents(self, user_code):
         try:
             recom = Recommendation()
-            user_prefiltered, first = recom.get_user_data(user_code)
+            tastes, first = recom.get_user_data(user_code)
 
             # 첫 추천
             if first:
-                contents_list = recom.get_first_10_contents(user_prefiltered)
+                contents_list = recom.get_first_contents(tastes)[:10]
                 return jsonify(contents=self.get_content_data(contents_list))
             # 선택된 컨텐츠 기반 추천
             else:
-                contents_list = recom.get_another_10_contents(user_prefiltered)
+                contents_list = recom.get_other_10_contents(tastes)
                 return jsonify(contents=self.get_content_data(contents_list))
 
         except Exception as e:
