@@ -1,5 +1,15 @@
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
+// export const commonOption = {
+//   plugins: {
+//     legend: {
+//       labels: {
+//         usePointStyle: true,
+//       },
+//     },
+//   },
+// };
+
 export const labels = [
   '2019-01',
   '2019-02',
@@ -136,6 +146,13 @@ export const allData = {
       fill: false,
       borderColor: '#B48EAD',
     },
+    {
+      type: 'bar', // 💗
+      label: '월별 코로나 확진자 수',
+      backgroundColor: '#5E81AC',
+      data: coronaAmount,
+      yAxisID: 'y_sub',
+    },
   ],
 };
 
@@ -194,8 +211,28 @@ export const netflixOption = {
   showAllTooltips: true,
   plugins: {
     datalabels: {
+      font: {
+        size: 12,
+      },
+      backgroundColor: '#161424',
+      align: 'top',
+      borderRadius: 5,
       formatter(value, context) {
         return netflixKeywords[context.dataIndex];
+      },
+      color: '#ECEFF4',
+      borderWidth: 4,
+    },
+    legend: {
+      labels: {
+        color: '#ECEFF4',
+        usePointStyle: true,
+        padding: 10,
+        font: {
+          family: "'Inter', 'serif'",
+          lineHeight: 2,
+          size: 14,
+        },
       },
     },
   },
@@ -256,8 +293,28 @@ export const wavveOption = {
   showAllTooltips: true,
   plugins: {
     datalabels: {
+      font: {
+        size: 12,
+      },
+      backgroundColor: '#161424',
+      align: 'top',
+      borderRadius: 5,
       formatter(value, context) {
         return wavveKeywords[context.dataIndex];
+      },
+      color: '#ECEFF4',
+      borderWidth: 4,
+    },
+    legend: {
+      labels: {
+        color: '#ECEFF4',
+        usePointStyle: true,
+        padding: 10,
+        font: {
+          family: "'Inter', 'serif'",
+          lineHeight: 2,
+          size: 14,
+        },
       },
     },
   },
@@ -318,8 +375,28 @@ export const coupangOption = {
   showAllTooltips: true,
   plugins: {
     datalabels: {
+      font: {
+        size: 12,
+      },
+      backgroundColor: '#161424',
+      align: 'top',
+      borderRadius: 5,
       formatter(value, context) {
         return coupangKeywords[context.dataIndex];
+      },
+      color: '#ECEFF4',
+      borderWidth: 4,
+    },
+    legend: {
+      labels: {
+        color: '#ECEFF4',
+        usePointStyle: true,
+        padding: 10,
+        font: {
+          family: "'Inter', 'serif'",
+          lineHeight: 2,
+          size: 14,
+        },
       },
     },
   },
@@ -380,8 +457,28 @@ export const tvingOption = {
   showAllTooltips: true,
   plugins: {
     datalabels: {
+      font: {
+        size: 12,
+      },
+      backgroundColor: '#161424',
+      align: 'top',
+      borderRadius: 5,
       formatter(value, context) {
         return tvingKeywords[context.dataIndex];
+      },
+      color: '#ECEFF4',
+      borderWidth: 4,
+    },
+    legend: {
+      labels: {
+        color: '#ECEFF4',
+        usePointStyle: true,
+        padding: 10,
+        font: {
+          family: "'Inter', 'serif'",
+          lineHeight: 2,
+          size: 14,
+        },
       },
     },
   },
@@ -442,8 +539,28 @@ export const whatchaOption = {
   showAllTooltips: true,
   plugins: {
     datalabels: {
+      font: {
+        size: 12,
+      },
+      backgroundColor: '#161424',
+      align: 'top',
+      borderRadius: 5,
       formatter(value, context) {
         return whatchaKeywords[context.dataIndex];
+      },
+      color: '#ECEFF4',
+      borderWidth: 4,
+    },
+    legend: {
+      labels: {
+        color: '#ECEFF4',
+        usePointStyle: true,
+        padding: 10,
+        font: {
+          family: "'Inter', 'serif'",
+          lineHeight: 2,
+          size: 14,
+        },
       },
     },
   },

@@ -1,21 +1,41 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import Ott from './ott';
 
 const OttList = ({ result }) => {
-  // TODO: delete this
+  const [ottData, setOttData] = useState([]);
+
   useEffect(() => {
-    console.log('eslint 방지용');
-  }, []);
+    const newData = [];
+
+    Object.keys(result.platform).map((ottName) =>
+      newData.push({
+        name: ottName,
+        ...result.platform[ottName],
+      }),
+    );
+
+    newData.sort((a, b) => {
+      if (a.percentage < b.percentage) {
+        return 1;
+      }
+      if (a.percentage > b.percentage) {
+        return -1;
+      }
+      return 0;
+    });
+
+    setOttData(newData);
+  }, [result]);
 
   return (
     <>
       <StyledTitle>당신에게 가장 잘 어울리는 OTT플랫폼은?</StyledTitle>
       <StyledDiv>
-        {Object.keys(result.platform).map((ottName) => (
+        {ottData.map((ott) => (
           <Wrapper>
-            <img src={`/images/${ottName}_logo.png`} alt={`${ottName} logo`} />
-            <Ott ottName={result.platform[ottName]} key={ottName} />
+            <img src={ott.imgurl} alt="" />
+            <Ott ottData={ott} />
           </Wrapper>
         ))}
       </StyledDiv>
