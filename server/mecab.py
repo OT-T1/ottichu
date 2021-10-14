@@ -18,8 +18,10 @@ class Data:
     def __init__(self, db=None):
         self.db = db
         self.data = None
-        self.model_tok = Doc2Vec.load("./True_model.doc2vec")
+        self.model_tok = Doc2Vec.load("./model.doc2vec")
         print("init func")
+        self.model_actor_tok = Doc2Vec.load("./actors_model.doc2vec")
+        self.model_director_tok = Doc2Vec.load("./directors_model.doc2vec")
 
     def make_data(self):
         print("make data")
@@ -57,12 +59,18 @@ class Data:
             )
 
             temp_items.append(title)
-            temp_items.append(str(actor))
-            temp_items.append(str(director))
-            temp_items.append(str(genre))
+            temp_items.append(
+                str(actor).replace("'", "").replace("]", "").replace("[", "")
+            )
+            temp_items.append(
+                str(director).replace("'", "").replace("]", "").replace("[", "")
+            )
+            temp_items.append(
+                str(genre).replace("'", "").replace("]", "").replace("[", "")
+            )
             temp_items.append(summary)
 
-            doc = " ".join(filter(lambda x: x is not None, temp_items))
+            doc = " ".join(temp_items)
 
             remove_sc = re.compile("[-=+,#/\?:^$.@*\"※~&%ㆍ!』\\‘|\(\)\[\]\<\>`'…》]")
             doc = remove_sc.sub("", doc)
@@ -74,14 +82,16 @@ class Data:
 
         self.data["doc"] = docs
         self.data["actors"] = actors
+        self.data["actors"] = self.data["actors"].astype(str)
         self.data["directors"] = directors
+        self.data["directors"] = self.data["directors"].astype(str)
         self.data["genres"] = genres
 
         m = Mecab()
         mecab_tok = []
 
-        for summary in self.data["summary"]:
-            words = m.nouns(summary)  # 고유명사화 알아보기
+        for doc in self.data["doc"]:
+            words = m.nouns(doc)  # 고유명사화 알아보기
             words = " ".join(words)
             mecab_tok.append(words)
 
@@ -89,6 +99,8 @@ class Data:
         self.data["mecab_tok"] = self.data["mecab_tok"].astype(str)
         self.data["doc"] = self.data["doc"].astype(str)
         self.data.index.name = "num"
+
+        print("end")
 
     def close_db(self):
         self.db.close()
