@@ -2,6 +2,7 @@ import { createSlice, createSelector } from '@reduxjs/toolkit';
 import { reducerState } from '../../utils/reducer';
 
 const initialState = {
+  history: [],
   selectedContent: {},
   contentList: reducerState.initial(null),
 };
@@ -14,7 +15,8 @@ const contentSlice = createSlice({
       state.selectedContent = {};
     },
     reqContentInfo(state) {
-      // TODO: 날릴지 말지 상태보고 결정!
+      state.history = state.history.concat(Object.keys(state.selectedContent));
+      state.selectedContent = {};
       state.contentList = reducerState.loading(state.contentList);
     },
     resContentInfo(state, action) {
@@ -32,6 +34,7 @@ const contentSlice = createSlice({
   },
 });
 
+const getContentHistory = (state) => state.content.history;
 const getSelectionStorage = (state) => state.content.selectedContent;
 const getContentList = (state) => state.content.contentList;
 
@@ -46,6 +49,7 @@ const isContentAnswered = createSelector(
 
 export const contentActions = contentSlice.actions;
 export const contentSelector = {
+  getContentHistory,
   getSelectionStorage,
   getContentList,
   getSelectedContent,

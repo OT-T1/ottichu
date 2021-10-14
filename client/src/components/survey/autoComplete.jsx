@@ -44,9 +44,9 @@ const AutoComplete = ({
       }
       if (e.code === 'ArrowUp' || e.code === 'ArrowDown') {
         e.preventDefault();
-        console.log('대상', e);
+        console.log(keyword);
         const target = navigate(e.code);
-        optionsRef.current.scrollTo({ top: 16, behavior: 'smooth' });
+        // optionsRef.current.scrollTo({ top: 16, behavior: 'smooth' });
         setOnHighlight(target);
         setKeyword(options[target]);
         return;
@@ -57,20 +57,22 @@ const AutoComplete = ({
           setKeyword('');
         }
       }
+      console.log('대상', e.target.value);
       // console.log(options);
     },
-    [options, loading, onSelect, navigate, isNameValid],
+    [loading, options, onSelect, navigate, isNameValid, keyword],
   );
 
   const handleChange = useCallback(
     (e) => {
+      console.log('sdfsf', keyword, e.target.value);
       setKeyword(e.target.value);
       setOnHighlight(-1);
       if (typeof onChange === 'function' && e.target.value) {
         onChange({ type: e.target.name, name: e.target.value });
       }
     },
-    [onChange],
+    [onChange, keyword],
   );
 
   // OptionList handler
@@ -104,7 +106,6 @@ const AutoComplete = ({
   //   [onBlur],
   // );
 
-  // TODO: 너무 조잡하다... 종속성 어떻게 떼내지? 하...
   return (
     <AutoCompleteWrapper htmlFor={`search--${name}`}>
       <span>{label}</span>

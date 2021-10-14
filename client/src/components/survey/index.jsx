@@ -3,8 +3,6 @@ import ReactFullpage from '@fullpage/react-fullpage';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faRedo } from '@fortawesome/free-solid-svg-icons';
 import StepBar from './stepBar';
 import SectionLayout from './sectionLayout';
 import UserInfo from './userInfo';
@@ -15,16 +13,16 @@ import OttTerms from './ottTerms';
 import FavoriteContent from './favoriteContent';
 import StyledBtn from '../common/styledBtn';
 
-const STORE_DELAY = 60000;
+const STORE_DELAY = 30000;
 
 const SurveyPage = () => {
   const history = useHistory();
   const dispatch = useDispatch();
+  const user = useSelector(selector.getUser);
   const sectionIndex = useSelector(selector.getSurveySectionIndex);
   const isSectionCompleted = useSelector(selector.isSectionCompleted);
   const hasBasicInfoSubmited = useSelector(selector.hasBasicInfoSubmited);
   const hasContentSubmited = useSelector(selector.hasContentSubmited);
-  const user = useSelector(selector.getUser);
   const anchors = useMemo(() => ['1', '2', '3', '4'], []);
   const SETIONS = useMemo(
     () => [
@@ -76,17 +74,20 @@ const SurveyPage = () => {
   const leaveSection = useCallback(
     (destination) => {
       dispatch(actions.movePage(destination.index));
-      if (destination.isLast && !hasBasicInfoSubmited) {
-        // TODO: Add submit action
-        dispatch(actions.reqSubmitBasic());
+      if (destination.isLast) {
+        if (!hasBasicInfoSubmited) {
+          dispatch(actions.reqSubmitBasic());
+          return;
+        }
+        dispatch(actions.reqContentInfo(user));
       }
     },
-    [dispatch, hasBasicInfoSubmited],
+    [dispatch, user, hasBasicInfoSubmited],
   );
 
   const handleNext = useCallback(() => {
     if (!isSectionCompleted) {
-      // TODO: 응답 요청 메시지 출력하도록!
+      window.alert('현재 페이지의 컨텐츠를 선택한 후 다시 시도해주세요.');
       return;
     }
     dispatch(actions.reqSubmitContent({ result: false }));
@@ -106,11 +107,12 @@ const SurveyPage = () => {
     dispatch(actions.reqContentInfo(user));
   }, [dispatch, user]);
 
+  // <FontAwesomeIcon icon={faRedo} color="white" />
   return (
     <>
       <StyledHeader hidden={sectionIndex !== SETIONS.length - 1}>
         <RefreshButton type="button" onClick={handleRefresh}>
-          <FontAwesomeIcon icon={faRedo} color="white" />
+          Refresh
         </RefreshButton>
       </StyledHeader>
       <main role="main">
@@ -169,9 +171,7 @@ const SurveyPage = () => {
 const StyledHeader = styled.header`
   position: fixed;
   text-align: right;
-  line-height: 20vh;
   width: 100%;
-  height: 20vh;
   z-index: 10;
   animation: 2s ease-in-out normal fadein;
   @keyframes fadein {
@@ -189,8 +189,12 @@ const RefreshButton = styled.button`
   outline: 0;
   border: 0;
   background: none;
-  margin-right: 8vw;
-  font-size: 30px;
+  line-height: 20vh;
+  margin-right: 10vw;
+  font-size: 1.5rem;
+  color: white;
+  font-family: 'Shadows Into Light', cursive;
+  transition: all 300ms ease-in;
   :hover {
     transform: scale(1.1);
   }

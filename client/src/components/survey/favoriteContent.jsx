@@ -20,13 +20,13 @@ const FavoriteContent = () => {
   return (
     <StyledFavoriteContent>
       <StyledContentWrapper>
-        <legend>컨텐츠 선택 목록</legend>
+        <legend>선호하는 컨텐츠를 선택해주세요.</legend>
         {loading ? (
           <StyledLoadingImgWrapper>
             <img src={loadingWalk} alt="loading" />
           </StyledLoadingImgWrapper>
         ) : (
-          contentList?.map(([code, title, director, url]) => (
+          contentList?.map(([code, title, , url]) => (
             <ImageCheckBox
               key={code}
               id={code}
@@ -37,7 +37,7 @@ const FavoriteContent = () => {
               value={code}
               defaultChecked={code in selectionStorage}
               onClick={handleCheck}
-              info={director ? director.join('|') : ''}
+              // info={director ? director.join('|') : ''}
             />
           ))
         )}
@@ -70,7 +70,7 @@ const StyledContentWrapper = styled.fieldset`
   }
 
   & > legend {
-    font-size: 0;
+    font-size: 1.7rem;
   }
 `;
 
