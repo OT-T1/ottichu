@@ -1,15 +1,19 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import WordCloud from 'react-d3-cloud';
 import styled from 'styled-components';
 
-const fontSize = (word) => word.value / 30;
-const rotate = (word) => (word.value % 90) - 45;
+const fontSize = (word) => word.value * 5;
+const rotate = (word) => ((word.value * 100) % 90) - 45;
 
 export default function KeywordCloud({ data }) {
-  const newData = data.map((item) => ({
-    text: item.text,
-    value: item.value,
-  }));
+  const [newData, setNewData] = useState([]);
+
+  useEffect(() => {
+    const temp = [];
+    data.words.map((word) => temp.push({ text: word[0], value: word[1] }));
+    setNewData(temp);
+  }, [data.words]);
+  console.log(newData);
 
   return (
     <DataWrapper>
@@ -21,6 +25,9 @@ export default function KeywordCloud({ data }) {
         padding={2}
         width={700}
         height={400}
+        onWordClick={(event, d) => {
+          console.log(`onWordClick: ${d.text}`);
+        }}
       />
     </DataWrapper>
   );
