@@ -2,13 +2,12 @@
 # DB에서 가져오기 - 실제 DB
 import re
 
+import config
 import numpy as np
 import pandas as pd
 import pymysql
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 from konlpy.tag import Mecab
-
-import config
 
 
 #%%
@@ -342,34 +341,57 @@ print(directors_other_codes)
 print(actors_other_codes)
 #%%
 # 처음 10개 작품 목록 받기
-def get_first_contents(tastes):
+# prefilter + get_first_10_contents
+# 10개 이상을 일단 출력해서 사용할 때 콘텐츠 코드 10개만 잘라쓰기
+def get_first_contents(tastes, history_codes):
+	
+	# 선택한 감독과 배우가 둘다 없다면
+	if len(tastes['actors']) == 0 and len(tastes['directors'] == 0):
+		tastes['actors'] = ['유재석', '송강호', '공유'] # 한 달 간 가장 언급 많이 된 배우
+		tastes['directors'] = ['김태호']
+	
+	# prefilter 부분 : 감독, 배우 입력 값으로 해당하는 컨텐츠 코드 가져오기
 
-	# 각각의 코드 생성
 	# 1) direcctor vector 생성 후 배우별 대표작 뽑기
 	director_contents_codes = get_person_codes(tastes, 'directors', model_director_tok)
 	# 2) actor vector 생성 후 배우별 대표작 뽑기
 	actor_contents_codes = get_person_codes(tastes, 'actors', model_actor_tok)
 
-	directors_other_codes = get_other_codes(director_contents_codes, model_director_tok)
-	actors_other_codes = get_other_codes(actor_contents_codes, model_actor_tok)
+	# 감독, 배우 컨텐츠 코드 모자라니까 더 만드는 부분(new)
+	directors_other_codes = get_other_codes(director_contents_codes, model_director_tok) + get_similar_codes(director_contents_codes, 1, model_director_tok)
+	actors_other_codes = get_other_codes(actor_contents_codes, model_actor_tok) + get_similar_codes(director_contents_codes, 1, model_actor_tok)
+	
 	length = min(len(directors_other_codes), len(actors_other_codes))
 
-	result = director_contents_codes + actor_contents_codes
+	temp = director_contents_codes + actor_contents_codes
+	result = []
+
+	for t in temp:
+		if t not in history_codes and t not in result:
+			result.append(t)
 
 	for i in range(length):
-		result.append(directors_other_codes[i]) if directors_other_codes[i] not in result else result
-		result.append(actors_other_codes[i]) if actors_other_codes[i] not in result else result
+		d_code = directors_other_codes[i]
+		a_code = actors_other_codes[i]
+		if d_code not in history_codes and d_code not in result:
+			result.append(d_code) 
+		if a_code not in history_codes and a_code not in result:
+			result.append(a_code)
 
 	if len(result) < 10:
-		more_directors_codes = get_other_codes(directors_other_codes, model_director_tok)
-		more_actors_codes = get_other_codes(actors_other_codes, model_actor_tok)
-		result = director_contents_codes + actor_contents_codes
+		more_directors_codes = get_similar_codes(directors_other_codes, 1,model_director_tok)
+		more_actors_codes = get_similar_codes(actors_other_codes, 1, model_actor_tok)
 
-		for i in range(length):
-			result.append(more_directors_codes[i]) if more_directors_codes[i] not in result else result
-			result.append(more_actors_codes[i]) if more_actors_codes[i] not in result else result
+		for j in range(length):
+			d_code = more_directors_codes[j]
+			a_code = more_actors_codes[j]
+			if d_code not in history_codes and d_code not in result:
+				result.append(d_code)
+			if a_code not in history_codes and a_code not in result:
+				result.append(a_code)
 
-	return result
+	return result  # content_codes
+
 
 
 
