@@ -4,7 +4,7 @@ const BASE_URL = 'http://localhost:5000/api';
 const createApi =
   (baseURL) =>
   (method) =>
-  (timeout = 1000) =>
+  (timeout = 10000) =>
   (url) =>
   async (data) => {
     try {
