@@ -315,7 +315,7 @@ class Recommendation:
             # GENRE DICT SETTING
             genres_list = db.session.query(genres).all()
 
-            unique_genre = genres_list["genre"].unique().tolist()  # 155개
+            unique_genre = set([genre.genre for genre in genres_list])  # 155개
 
             genre_count = dict()
             for ug in unique_genre:
@@ -329,7 +329,7 @@ class Recommendation:
                 content_genres = db.session.query(content_genre).filter(
                     content_genre.content_code == content_code
                 )
-                genres_items = content_genres["genre"].tolist()
+                genres_items = [temp.genre for temp in content_genres]
                 for genre in genres_items:
                     try:
                         genre_count[genre] += weight[idx]  # 가중치 부여 점수 환산
