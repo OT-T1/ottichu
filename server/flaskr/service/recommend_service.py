@@ -1,7 +1,16 @@
+import re
+
 import numpy as np
 import pandas as pd
 from db_connect import db
-from flaskr.models import user_actors, user_contents, user_directors, users
+from flaskr.models import (
+    content_genre,
+    genres,
+    user_actors,
+    user_contents,
+    user_directors,
+    users,
+)
 from mecab import mecab_data
 
 
@@ -34,154 +43,115 @@ class Recommendation:
             if target_user.is_tvshow:
                 tmp.append("TV 프로그램")
 
-            user_prefiltered = self.pre_filter(
-                t_actors=t_user_actors,
-                t_directors=t_user_directors,
-                t_category=tmp,
-                t_contents=t_user_contents,
-            )
+            tastes = {
+                "directors": [director.director for director in t_user_directors]
+                if len(t_user_directors) != 0
+                else ["봉준호", "김태호"],
+                "actors": [actor.actor for actor in t_user_actors]
+                if len(t_user_actors) != 0
+                else ["유재석", "송강호"],
+                "category": tmp,
+                "contents": [content.content_code for content in t_user_contents],
+            }
+
             if len(t_user_contents) == 0:
                 first = True
             else:
                 first = False
 
-            return user_prefiltered, first
+            return tastes, first
         except Exception as e:
             print("get_user_data", e)
             return False
 
-    def pre_filter(self, t_actors, t_directors, t_category, t_contents):
+    def get_first_contents(self, tastes):
         try:
-            sel_director = " ".join([td.director for td in t_directors])
-            sel_actor = " ".join([ta.actor for ta in t_actors])
-            sel_category = " ".join([tc for tc in t_category])
-
-            # DB에서 사용자가 선택한 인덱스를 가져온다
-
-            sel_contents = [tc.content_code for tc in t_contents]
-
-            data = mecab_data.data
-            prev_user = (
-                data.loc[data["content_code"].isin(sel_contents)]
-                .sort_values(by=["rating"], ascending=False)
-                .reset_index()
+            director_contents_codes = self.get_person_codes(
+                tastes, "directors", mecab_data.model_director_tok
+            )
+            # 2) actor vector 생성 후 배우별 대표작 뽑기
+            actor_contents_codes = self.get_person_codes(
+                tastes, "actors", mecab_data.model_actor_tok
             )
 
-            user_prefiltered = (
-                data.loc[
-                    (
-                        data["directors"].astype(str).str.contains(f"{sel_director}")
-                        | data["actors"].astype(str).str.contains(f"{sel_actor}")
-                    )
-                    & (data["category"] == f"{sel_category}")
-                ]
-                .sort_values(by=["rating"], ascending=False)
-                .reset_index()
+            directors_other_codes = self.get_other_codes(
+                director_contents_codes, mecab_data.model_director_tok
             )
-
-            user = pd.concat([prev_user[:1], user_prefiltered[:10]], ignore_index=True)
-
-            return user
-        except Exception as e:
-            print("pre_filter", e)
-            return False
-
-    def get_first_10_contents(self, user_prefiltered):
-        try:
-            user_updated_embedded = self.make_user_embedding(
-                user_prefiltered["content_code"],
-                mecab_data.model_tok,
+            actors_other_codes = self.get_other_codes(
+                actor_contents_codes, mecab_data.model_actor_tok
             )
-            similar_contents = mecab_data.model_tok.dv.most_similar(
-                user_updated_embedded, topn=20
-            )
-            similar_contents = list(set(similar_contents))[:10]
+            length = min(len(directors_other_codes), len(actors_other_codes))
 
-            content_codes = [x[0] + 1 for x in similar_contents]
-            data = mecab_data.data
+            result = director_contents_codes + actor_contents_codes
 
-            result_codes = (
-                data.loc[data["content_code"].isin(content_codes)]
-                .sort_values(by=["rating"], ascending=False)
-                .reset_index()
-            )
-            result_codes = result_codes["content_code"].values.tolist()
+            for i in range(length):
+                result.append(directors_other_codes[i]) if directors_other_codes[
+                    i
+                ] not in result else result
+                result.append(actors_other_codes[i]) if actors_other_codes[
+                    i
+                ] not in result else result
 
-            return result_codes
+            if len(result) < 10:
+                more_directors_codes = self.get_other_codes(
+                    directors_other_codes, mecab_data.model_director_tok
+                )
+                more_actors_codes = self.get_other_codes(
+                    actors_other_codes, mecab_data.model_actor_tok
+                )
+                result = director_contents_codes + actor_contents_codes
+
+                for i in range(length):
+                    result.append(more_directors_codes[i]) if more_directors_codes[
+                        i
+                    ] not in result else result
+                    result.append(more_actors_codes[i]) if more_actors_codes[
+                        i
+                    ] not in result else result
+
+            return result
         except Exception as e:
             print("get_first_10_contents", e)
             return False
 
-    def make_user_embedding(self, content_code_list, model):
+    def get_other_10_contents(self, tastes):
         try:
-            user_embedding = []
-            for i in content_code_list:
-                try:
-                    user_embedding.append(model.dv[i - 1])
-                except Exception as e:
-                    print("i", i, e)
+            skip_codes = []
 
-            user_embedding = np.array(user_embedding)
-            user = np.mean(user_embedding, axis=0)
+            new_codes = self.get_other_codes(tastes["contents"], mecab_data.model_tok)
+            rest_codes = self.get_first_contents(tastes)[10:]
 
-            return user
-        except Exception as e:
-            print("make_user_embedding", e)
-            return False
+            result = []
 
-    def get_another_10_contents(self, user_updated):
-        try:
-            user_updated_embedded = self.make_user_embedding(
-                user_updated["content_code"],
-                mecab_data.model_tok,
-            )
+            for nc in new_codes:
+                if nc not in skip_codes and nc not in result:
+                    result.append(nc)
 
-            num_code = len(user_updated)
-            prev_code = user_updated["content_code"].values.tolist()
-            similar_contents = mecab_data.model_tok.dv.most_similar(
-                user_updated_embedded, topn=num_code + 10
-            )
+            more_codes = self.get_other_codes(result, mecab_data.model_tok)
 
-            temp_code = [x[0] + 1 for x in similar_contents]
+            for mc in more_codes:
+                if mc not in skip_codes and mc not in result:
+                    result.append(mc)
 
-            data = mecab_data.data
-            new_code = (
-                data.loc[data["content_code"].isin(temp_code)]
-                .sort_values(by=["rating"], ascending=False)
-                .reset_index()
-            )
-            new_code = new_code["content_code"].values.tolist()
+            for rc in rest_codes:
+                if rc not in skip_codes and rc not in result:
+                    result.append(rc)
 
-            another_10_contents = list(set(prev_code + new_code))[:10]
+            more_more_codes = self.get_other_codes(more_codes, mecab_data.model_tok)
+            result = new_codes + rest_codes + more_codes + more_more_codes
 
-            return another_10_contents
+            return result[:10]
         except Exception as e:
             print("get_another_10_contents", e)
             return False
 
-    def get_recom_result(self, user_updated):
+    def get_result(self, final_codes):
         try:
-            user_final = self.make_user_embedding(
-                user_updated["content_code"].values.tolist(), mecab_data.model_tok
-            )
+            while len(final_codes) < 200:
+                temp = self.get_similar_codes(final_codes, 3, mecab_data.model_tok)
+                final_codes += temp
 
-            # 최종 데이터와 유사한 문서 상위 200개를 선정하여, 어느 ott에 더 많은지 알려주기
-            final_contents = mecab_data.model_tok.dv.most_similar(user_final, topn=200)
-
-            final_temp_codes = [x[0] + 1 for x in final_contents]
-            # final_content_codes = [x[0] for x in final_contents]
-
-            final_codes = (
-                mecab_data.data.loc[
-                    mecab_data.data["content_code"].isin(final_temp_codes)
-                ]
-                .sort_values(by=["rating"], ascending=False)
-                .reset_index()
-            )
-
-            final_codes = final_codes["content_code"].values.tolist()
-
-            return final_codes
+            return final_codes[:200]
         except Exception as e:
             print("get_result", e)
             return False
@@ -193,7 +163,6 @@ class Recommendation:
             ott = ["netflix", "tving", "wavve", "watcha", "coupang"]
             ott_counts = dict()
             for idx, is_ott in enumerate(otts):
-                # print(f"{is_ott}", count['content_code'][count[f'{is_ott}'] == 1].count())
                 val = count[{is_ott}].sum().values[0]
                 print(f"{is_ott}", val)
                 ott_counts[ott[idx]] = val
@@ -255,4 +224,145 @@ class Recommendation:
             return tokens
         except Exception as e:
             print("for_wordcloud", e)
+            return False
+
+    def get_similar_codes(self, content_codes, n, model):
+        try:
+            result = []
+            for code in content_codes:
+                code_vector = self.make_embedding([code], mecab_data.model_tok)
+                similar_codes = model.dv.most_similar(code_vector, topn=n)
+                result_content_codes = [x[0] + 1 for x in similar_codes[1:]]
+                result += result_content_codes
+
+            return result
+        except Exception as e:
+            print("get_similar_codes", e)
+            return False
+
+    def get_person_codes(self, tastes, jobtype, model):
+        try:
+            contents_codes = []
+
+            for person in tastes[jobtype]:
+                picked = (
+                    mecab_data.data["content_code"]
+                    .loc[mecab_data.data[jobtype].astype(str).str.contains(f"{person}")]
+                    .values.tolist()
+                )
+                embedded_pick = self.make_embedding(picked, model)
+                representations = model.dv.most_similar(embedded_pick, topn=2)
+
+                contents_codes += [rep[0] + 1 for rep in representations]
+
+            return contents_codes
+        except Exception as e:
+            print("get_person_codes", e)
+            return False
+
+    def get_title(self, content_code):
+        try:
+            title = str(
+                mecab_data.data["title"]
+                .loc[mecab_data.data["content_code"] == content_code]
+                .values
+            )
+            title = re.sub(r"[\[\]\'\"]", "", title)
+
+            stopwords = ["흑백판", "4K", "리마스터링"]
+            for stop in stopwords:
+                title = re.sub(stop, "", title)
+
+            return title
+
+        except Exception as e:
+            print("get_title", e)
+            return False
+
+    def check_title(self, prev_title, curr_title):
+        if prev_title in curr_title:
+            return True
+        return False
+
+    def get_other_codes(self, content_codes, model):
+        try:
+            result = []
+            for code in content_codes:
+                embedded = self.make_embedding([code], model)
+                most_similar = model.dv.most_similar(embedded, topn=2)
+                ms = most_similar[1][0] + 1
+
+                if len(result) == 0:
+                    result.append(ms)
+
+                elif len(result) != 0:
+                    prev_title = self.get_title(result[-1])
+                    curr_title = self.get_title(ms)
+
+                    if (self.check_title(prev_title, curr_title) == False) and (
+                        ms not in result
+                    ):
+                        result.append(ms)
+
+            return result
+
+        except Exception as e:
+            print("get_other_codes", e)
+            return False
+
+    def get_top_genre(self, result):
+        try:
+            # GENRE DICT SETTING
+            genres_list = db.session.query(genres).all()
+
+            unique_genre = genres_list["genre"].unique().tolist()  # 155개
+
+            genre_count = dict()
+            for ug in unique_genre:
+                genre_count[ug] = 0
+
+            # WEIGHT
+            weight = [i for i in range(200, 0, -1)]
+
+            for idx, content_code in enumerate(result):
+
+                content_genres = db.session.query(content_genre).filter(
+                    content_genre.content_code == content_code
+                )
+                genres_items = content_genres["genre"].tolist()
+                for genre in genres_items:
+                    try:
+                        genre_count[genre] += weight[idx]  # 가중치 부여 점수 환산
+                    except Exception as e:
+                        print(e)
+
+            top_genre = sorted(genre_count.items(), reverse=True, key=lambda x: x[1])[
+                :5
+            ]
+
+            category = dict()
+            for key, val in top_genre:
+                category[key] = val
+
+            return category
+        except Exception as e:
+            print("get_top_genre", e)
+            return False
+
+    def make_embedding(self, content_code_list, model_tok):
+        try:
+            user_embedding = []
+            for i in content_code_list:
+                try:
+                    user_embedding.append(model_tok.dv[i - 1])
+                except:
+                    pass
+
+            user_embedding = np.array(user_embedding)
+            user = np.mean(user_embedding, axis=0)
+
+            return user
+
+        except Exception as e:
+            print("make embedding", e)
             return False

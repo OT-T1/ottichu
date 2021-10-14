@@ -83,6 +83,9 @@ class Result:
 
         token_cnt = Counter(tokens.split())
         for word in ["그", "것", "이"]:
-            token_cnt.pop(word)
+            try:
+                token_cnt.pop(word)
+            except:
+                pass
 
         return jsonify(words=token_cnt.most_common(300)), 200
