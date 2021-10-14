@@ -25,8 +25,6 @@ const ResultPage = () => {
         setResult(apiResult);
         const apiData = await api.getWordCloudData({ user_code: user });
         setWordData(apiData);
-
-        console.log(`💩 ${apiData}`);
       } catch (e) {
         setError(e);
       }
@@ -45,7 +43,7 @@ const ResultPage = () => {
       <StyledTitle>분석 결과</StyledTitle>
       <StyledVisualSection>
         <PreferenceChart categories={result.category} />
-        <KeywordCloud data={wordData} />
+        <KeywordCloud data={wordData.words} />
       </StyledVisualSection>
       <OttList result={result} />
       <ContentsDiagram />

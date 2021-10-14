@@ -6,7 +6,9 @@ data = Blueprint("data", __name__, url_prefix="/api/data")
 # 추천 컨텐츠
 @data.route("/contents", methods=["GET"])
 def get_recommend_content():
-    return Contents.get_contents()
+    user_code = request.args.get("user_code")
+    contents_service = Contents()
+    return contents_service.get_contents(user_code=user_code)
 
 
 @data.route("/actors", methods=["GET"])

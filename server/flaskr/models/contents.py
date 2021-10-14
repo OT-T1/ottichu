@@ -20,6 +20,8 @@ class contents(db.Model):
     run_time = db.Column(db.String(20))
 
     rating = db.Column(db.Float)
+    original_img = db.Column(db.String(255))
+    s3_img = db.Column(db.String(255))
 
     is_netflix = db.Column(db.Boolean)
     is_tving = db.Column(db.Boolean)
