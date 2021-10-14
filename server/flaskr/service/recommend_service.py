@@ -44,8 +44,12 @@ class Recommendation:
                 tmp.append("TV 프로그램")
 
             tastes = {
-                "directors": [director.director for director in t_user_directors],
-                "actors": [actor.actor for actor in t_user_actors],
+                "directors": [director.director for director in t_user_directors]
+                if len(t_user_directors) != 0
+                else ["봉준호", "김태호"],
+                "actors": [actor.actor for actor in t_user_actors]
+                if len(t_user_actors) != 0
+                else ["유재석", "송강호"],
                 "category": tmp,
                 "contents": [content.content_code for content in t_user_contents],
             }
