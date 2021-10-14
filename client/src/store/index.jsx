@@ -1,10 +1,19 @@
 import { configureStore } from '@reduxjs/toolkit';
 import logger from 'redux-logger';
-import reducer from './modules';
+import createSagaMiddleware from 'redux-saga';
+import reducer, { rootSaga } from './modules';
+import history from '../utils/history';
+
+const sagaMiddleware = createSagaMiddleware({
+  context: { history },
+});
 
 const store = configureStore({
   reducer,
-  middleware: [logger],
+  middleware: [sagaMiddleware, logger],
+  // middleware: [sagaMiddleware],
 });
+
+sagaMiddleware.run(rootSaga);
 
 export default store;

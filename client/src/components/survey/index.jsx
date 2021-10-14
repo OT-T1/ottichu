@@ -1,53 +1,236 @@
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import ReactFullpage from '@fullpage/react-fullpage';
+import { useDispatch, useSelector } from 'react-redux';
+import { useHistory } from 'react-router-dom';
+import styled from 'styled-components';
+import StepBar from './stepBar';
+import SectionLayout from './sectionLayout';
+import UserInfo from './userInfo';
+import { actions, selector } from '../../store/modules';
+import PreferenceType from './preferenceType';
+import { handleLeave, handleScrollSlide } from '../../utils';
+import OttTerms from './ottTerms';
+import FavoriteContent from './favoriteContent';
+import StyledBtn from '../common/styledBtn';
+
+const STORE_DELAY = 30000;
 
 const SurveyPage = () => {
-  useEffect(() => {
-    console.log('eslint 방지');
-  }, []);
+  const history = useHistory();
+  const dispatch = useDispatch();
+  const user = useSelector(selector.getUser);
+  const sectionIndex = useSelector(selector.getSurveySectionIndex);
+  const isSectionCompleted = useSelector(selector.isSectionCompleted);
+  const hasBasicInfoSubmited = useSelector(selector.hasBasicInfoSubmited);
+  const hasContentSubmited = useSelector(selector.hasContentSubmited);
+  const anchors = useMemo(() => ['1', '2', '3', '4'], []);
+  const SETIONS = useMemo(
+    () => [
+      {
+        id: '69b9fe',
+        title: '사용자 정보 선택 페이지',
+        contents: <UserInfo />,
+      },
+      {
+        id: '5d6165',
+        title: '카테고리 및 감독, 배우 선호도 선택 페이지',
+        contents: <PreferenceType />,
+      },
+      {
+        id: 'cf8fa4',
+        title: '희망 OTT 조건 선택 페이지',
+        contents: <OttTerms />,
+      },
+      {
+        id: '0d1813',
+        title: '좋아하는 컨텐츠 선택 페이지',
+        contents: <FavoriteContent />,
+      },
+    ],
+    [],
+  );
 
+  // 일정 주기로 로컬 스토리지에 작성 정보 저장
+  useEffect(() => {
+    dispatch(
+      actions.registerScheduler(
+        setInterval(() => dispatch(actions.storeSurveyRecord()), STORE_DELAY),
+      ),
+    );
+  }, [dispatch]);
+
+  const movePreviousRecord = useCallback(
+    (anchor) =>
+      anchor !== sectionIndex &&
+      window.fullpage_api.moveTo(anchors[sectionIndex]),
+    [anchors, sectionIndex],
+  );
+
+  // Control Section Scroll
+  useEffect(() => {
+    handleScrollSlide(window.fullpage_api)(isSectionCompleted, 'down');
+  }, [isSectionCompleted]);
+
+  const leaveSection = useCallback(
+    (destination) => {
+      dispatch(actions.movePage(destination.index));
+      if (destination.isLast) {
+        if (!hasBasicInfoSubmited) {
+          dispatch(actions.reqSubmitBasic());
+          return;
+        }
+        dispatch(actions.reqContentInfo(user));
+      }
+    },
+    [dispatch, user, hasBasicInfoSubmited],
+  );
+
+  const handleNext = useCallback(() => {
+    if (!isSectionCompleted) {
+      window.alert('현재 페이지의 컨텐츠를 선택한 후 다시 시도해주세요.');
+      return;
+    }
+    dispatch(actions.reqSubmitContent({ result: false }));
+  }, [dispatch, isSectionCompleted]);
+
+  const moveResultPage = useCallback(() => {
+    if (!hasContentSubmited && !isSectionCompleted) {
+      // TODO: 응답 요청 메시지 출력하도록!
+      return;
+    }
+    // TODO: Request result to Api url
+    dispatch(actions.reqSubmitContent({ result: true }));
+    history.replace('/result');
+  }, [history, dispatch, isSectionCompleted, hasContentSubmited]);
+
+  const handleRefresh = useCallback(() => {
+    dispatch(actions.reqContentInfo(user));
+  }, [dispatch, user]);
+
+  // <FontAwesomeIcon icon={faRedo} color="white" />
   return (
-    <form
-      action=""
-      onSubmit={(e) => {
-        e.preventDefault();
-        console.log('hi');
-      }}
-    >
-      <ReactFullpage
-        // licenseKey=""
-        anchors={['1', '2', '3', '4']}
-        onLeave={(original, destination, direction) => {
-          if (destination.anchor === '4' && direction === 'down') {
-            alert('제출!!!!!!!!!!!!!!!!!');
-          }
-        }}
-        render={() => (
-          <ReactFullpage.Wrapper>
-            <fieldset className="section">
-              <legend>1</legend>
-            </fieldset>
-            <fieldset className="section">
-              <legend>2</legend>
-            </fieldset>
-            <fieldset className="section">
-              <legend>3</legend>
-            </fieldset>
-            <fieldset className="section">
-              <legend>4</legend>
-            </fieldset>
-          </ReactFullpage.Wrapper>
-        )}
-      />
-      <button
-        style={{ position: 'fixed', bottom: '100px' }}
-        type="submit"
-        onClick={() => console.log('결과!!!!!!!')}
-      >
-        결과
-      </button>
-    </form>
+    <>
+      <StyledHeader hidden={sectionIndex !== SETIONS.length - 1}>
+        <RefreshButton type="button" onClick={handleRefresh}>
+          Refresh
+        </RefreshButton>
+      </StyledHeader>
+      <main role="main">
+        <StyledStepBarWrapper>
+          <StepBar
+            width="25px"
+            height="70vh"
+            anchors={['#1', '#2', '#3', '#4']}
+          />
+        </StyledStepBarWrapper>
+        <div role="form">
+          <ReactFullpage
+            // licenseKey=""
+            // fixedElements=".testbtn"
+            anchors={anchors}
+            controlArrows={false}
+            afterRender={movePreviousRecord}
+            normalScrollElements="#directors-option--list, #actors-option--list"
+            onLeave={handleLeave('scroll', leaveSection)}
+            sectionsColor={['#0F0C1D', '#0F0C1D', '#0F0C1D', '#0F0C1D']}
+            render={({ state, fullpageApi }) => (
+              <ReactFullpage.Wrapper>
+                {SETIONS.map(({ id, title, contents }, index) => (
+                  <SectionLayout
+                    key={id}
+                    index={index}
+                    title={title}
+                    state={state}
+                    fullpageApi={fullpageApi}
+                    contents={contents}
+                  />
+                ))}
+              </ReactFullpage.Wrapper>
+            )}
+          />
+          <StyledBtnWrapper hidden={sectionIndex !== SETIONS.length - 1}>
+            <StyledBtn
+              type="button"
+              text="Result"
+              onClick={moveResultPage}
+              colorType="stylish"
+            />
+            <StyledBtn
+              type="button"
+              text="Next"
+              onClick={handleNext}
+              colorType="stylish"
+            />
+          </StyledBtnWrapper>
+        </div>
+      </main>
+    </>
   );
 };
+
+const StyledHeader = styled.header`
+  position: fixed;
+  text-align: right;
+  width: 100%;
+  z-index: 10;
+  animation: 2s ease-in-out normal fadein;
+  @keyframes fadein {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+`;
+
+const RefreshButton = styled.button`
+  cursor: pointer;
+  outline: 0;
+  border: 0;
+  background: none;
+  line-height: 20vh;
+  margin-right: 10vw;
+  font-size: 1.5rem;
+  color: white;
+  font-family: 'Shadows Into Light', cursive;
+  transition: all 300ms ease-in;
+  :hover {
+    transform: scale(1.1);
+  }
+`;
+
+const StyledStepBarWrapper = styled.aside`
+  display: flex;
+  align-items: center;
+  position: fixed;
+  left: 7%;
+  width: 25px;
+  height: 100%;
+  z-index: 1;
+`;
+
+const StyledBtnWrapper = styled.div`
+  width: 100%;
+  height: 20vh;
+  text-align: center;
+  position: fixed;
+  line-height: 20vh;
+  bottom: 0;
+  animation: 2s ease-in-out normal fadein;
+  @keyframes fadein {
+    // 임시
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  & > button {
+    margin: 0 3vw;
+  }
+`;
 
 export default SurveyPage;

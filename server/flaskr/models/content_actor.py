@@ -3,23 +3,21 @@ from db_connect import db
 
 class content_actor(db.Model):
     __tablename__ = "content_actor"
-    __table_args__ = {"mysql_collate": "utf8_general_ci"}
+    __table_args__ = {
+        "mysql_default_charset": "utf8mb4",
+        "mysql_collate": "utf8mb4_general_ci",
+    }
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
-    title = db.Column(
-        db.String(255),
-        db.ForeignKey("contents.title", ondelete="CASCADE", onupdate="CASCADE"),
-        nullable=False,
-    )
 
-    director = db.Column(
-        db.String(255),
-        db.ForeignKey("contents.director", ondelete="CASCADE", onupdate="CASCADE"),
+    content_code = db.Column(
+        db.Integer,
+        db.ForeignKey("contents.content_code", ondelete="CASCADE", onupdate="CASCADE"),
         nullable=False,
     )
 
     actor = db.Column(
-        db.String(50),
+        db.String(255),
         db.ForeignKey("actors.actor", ondelete="CASCADE", onupdate="CASCADE"),
         nullable=False,
     )
