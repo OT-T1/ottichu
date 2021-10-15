@@ -46,12 +46,8 @@ class Recommendation:
                 tmp.append("TV 프로그램")
 
             tastes = {
-                "directors": [director.director for director in t_user_directors]
-                if len(t_user_directors) != 0
-                else ["봉준호", "김태호"],
-                "actors": [actor.actor for actor in t_user_actors]
-                if len(t_user_actors) != 0
-                else ["유재석", "송강호"],
+                "directors": [director.director for director in t_user_directors],
+                "actors": [actor.actor for actor in t_user_actors],
                 "category": tmp,
                 "contents": [content.content_code for content in t_user_contents],
             }
@@ -152,18 +148,15 @@ class Recommendation:
             len_directors = len(user_tastes["directors"])
             len_actors = len(user_tastes["actors"])
 
-            if len_directors < 5:
+            if len_directors == 0:
                 dum_direc_choice = random.sample(dummy_directors, 5 - len_directors)
                 user_tastes["directors"] += dum_direc_choice
-            if len(user_tastes["actors"]) == 0:
+            if len_actors == 0:
                 dum_ac_choice = random.sample(dummy_actors, 5 - len_actors)
                 user_tastes["actors"] += dum_ac_choice
 
-            director_contents_codes = self.get_person_codes(user_tastes, "directors")[
-                :5
-            ]
-            actor_contents_codes = self.get_person_codes(user_tastes, "actors")[:5]
-            # prefilter 부분 : 감독, 배우 입력 값으로 해당하는 컨텐츠 코드 가져오기
+            director_contents_codes = self.get_person_codes(user_tastes, "directors")
+            actor_contents_codes = self.get_person_codes(user_tastes, "actors")
 
             d_codes = director_contents_codes
             a_codes = actor_contents_codes
@@ -314,22 +307,16 @@ class Recommendation:
             print("get_similar_codes", e)
             return False
 
-    def get_person_codes(self, tastes, jobtype, model):
+    def get_person_codes(self, tastes, jobtype):
         try:
-            contents_codes = []
-
             for person in tastes[jobtype]:
                 picked = (
                     mecab_data.data["content_code"]
                     .loc[mecab_data.data[jobtype].astype(str).str.contains(f"{person}")]
                     .values.tolist()
                 )
-                embedded_pick = self.make_embedding(picked, model)
-                representations = model.dv.most_similar(embedded_pick, topn=2)
 
-                contents_codes += [rep[0] + 1 for rep in representations]
-
-            return contents_codes
+            return picked
         except Exception as e:
             print("get_person_codes", e)
             return False

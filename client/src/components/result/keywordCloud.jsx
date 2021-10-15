@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import WordCloud from 'react-d3-cloud';
 import styled from 'styled-components';
 
-const fontSize = (word) => word.value * 5;
+const fontSize = (word) => word.value;
 const rotate = (word) => ((word.value * 100) % 90) - 45;
 
 export default function KeywordCloud({ data }) {

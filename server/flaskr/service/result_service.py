@@ -51,8 +51,9 @@ class Result:
 
     def get_wordcloud(user_code):
         recom = Recommendation()
-        result_data, _ = recom.get_user_data(user_code)
-        tokens = recom.for_wordcloud(result_data["contents"])
+        user_data, _ = recom.get_user_data(user_code)
+        result_data = recom.get_result(user_data["contents"])
+        tokens = recom.for_wordcloud(result_data)
         token_cnt = Counter(tokens.split())
         for word in ["그", "것", "이"]:
             try:

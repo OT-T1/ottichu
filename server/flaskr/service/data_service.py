@@ -52,14 +52,12 @@ class Contents:
 
             # 첫 추천
             if first:
-                print("first", tastes, history_codes)
                 contents_list = recom.get_first_contents(tastes, set(history_codes))[
                     :10
                 ]
                 return jsonify(contents=self.get_content_data(contents_list))
             # 선택된 컨텐츠 기반 추천
             else:
-                print("other", tastes, history_codes)
                 contents_list = recom.get_other_10_contents(tastes, set(history_codes))
                 return jsonify(contents=self.get_content_data(contents_list))
 
