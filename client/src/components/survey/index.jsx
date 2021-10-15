@@ -83,7 +83,7 @@ const SurveyPage = () => {
           return;
         }
         if (!isContentAnswered) {
-          dispatch(actions.reqContentInfo(user));
+          dispatch(actions.reqContentInfo({ user }));
         }
       }
     },

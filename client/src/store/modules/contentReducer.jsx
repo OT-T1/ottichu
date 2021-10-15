@@ -25,10 +25,12 @@ const contentSlice = createSlice({
     closeConfirm(state) {
       state.onConfirm = false;
     },
-    reqContentInfo(state) {
+    reqContentInfo(state, action) {
+      const { refresh } = action.payload;
       if (
-        state.contentList.data &&
-        Object.keys(state.selectedContent).length !== 0
+        refresh ||
+        (state.contentList.data &&
+          Object.keys(state.selectedContent).length !== 0)
       ) {
         state.history = state.history.concat(
           state.contentList.data.map(([code]) => code),
