@@ -44,7 +44,7 @@ const OttList = ({ result }) => {
 };
 
 const StyledTitle = styled.h3`
-  font-family: 'Inter';
+  font-family: 'Pretendard';
   font-style: normal;
   font-weight: bold;
   font-size: 1.8em;
@@ -63,6 +63,14 @@ const StyledDiv = styled.div`
   img {
     width: 20em;
     height: 12em;
+  }
+
+  & > div:first-child {
+    margin-right: 0.2em;
+  }
+
+  & > div + div {
+    margin-right: 0.2em;
   }
 `;
 
