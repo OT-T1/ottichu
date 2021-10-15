@@ -10,7 +10,16 @@ const DATA_TYPE = Object.freeze({
   preference: 2,
   ottTerms: 3,
 });
-const STORE_SURVEY_RECORD = 'survey/storeSurveyRecord';
+const STORE_SURVEY_RECORD = [
+  'user/selectAge',
+  'user/selectGender',
+  'preference/selectCategories',
+  'preference/selectActorDirector',
+  'preference/deleteActorDirector',
+  'ottTerms/selectOttPrice',
+  'ottTerms/selectOttGroupCnt',
+  'ottTerms/selectOttFreeTime',
+];
 
 function* createRecordForm() {
   const recordData = yield all([

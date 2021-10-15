@@ -19,7 +19,7 @@ const PreferenceType = () => {
   const CATEGORY_TYPES = useMemo(
     () => [
       { id: 'ctgry--movie', type: 'movie', label: '영화' },
-      { id: 'ctgry--tvshow', type: 'tvshow', label: 'TV 프로그램' },
+      { id: 'ctgry--tvshow', type: 'tv_show', label: 'TV 프로그램' },
     ],
     [],
   );

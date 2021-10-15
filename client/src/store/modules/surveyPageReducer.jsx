@@ -6,7 +6,6 @@ import { preferenceSelector } from './preferenceReducer';
 import { userSelector } from './userReducer';
 
 const initialState = {
-  schedulerId: null,
   isLoading: false,
   sectionIndex: 0,
   submitLog: {
@@ -22,10 +21,6 @@ const surveySlice = createSlice({
     registerScheduler(state, action) {
       state.schedulerId = action.payload;
     },
-    clearScheduler(state) {
-      clearTimeout(state.schedulerId);
-    },
-    storeSurveyRecord() {},
     loadPreviousRecord(state) {
       state.isLoading = true;
     },
@@ -69,7 +64,6 @@ const surveySlice = createSlice({
   },
 });
 
-const getSchedulerId = (state) => state.survey.schedulerId;
 const getSurveyPageStatus = (state) => state.survey.isLoading;
 const getSurveySectionIndex = (state) => state.survey.sectionIndex;
 const hasBasicInfoSubmited = (state) => !!state.survey.submitLog.basic.data;
@@ -105,7 +99,6 @@ const getSurveyInfo = createSelector(
 
 export const surveyActions = surveySlice.actions;
 export const surveySelector = {
-  getSchedulerId,
   getSurveyPageStatus,
   getSurveySectionIndex,
   hasBasicInfoSubmited,

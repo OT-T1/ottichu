@@ -58,7 +58,6 @@ const FavoriteContent = ({ fullpageApi }) => {
   }, [dispatch, openPopup, isContentAnswered, loading]);
 
   const goResult = useCallback(() => {
-    dispatch(actions.clearScheduler());
     dispatch(actions.reqSubmitContent({ result: true }));
     // 현재 로컬 스토리지에 저장된 데이터 삭제
     window.localStorage.removeItem('ottichu');
