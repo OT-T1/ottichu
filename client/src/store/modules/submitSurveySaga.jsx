@@ -65,6 +65,8 @@ function* submitBasicInfo() {
     yield put(surveyActions.resSubmitBasic(reducerState.success(true)));
     // 응답받은 사용자 코드 등록
     yield put(userActions.registerUserCode(response.user_code));
+    // 컨텐츠 정보 요청
+    yield put(contentActions.reqContentInfo(response.user_code));
   } catch (e) {
     yield put(surveyActions.resSubmitBasic(reducerState.failure(e)));
   }

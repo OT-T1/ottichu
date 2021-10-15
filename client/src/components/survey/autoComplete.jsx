@@ -83,28 +83,14 @@ const AutoComplete = ({
 
   const handleClick = useCallback(
     (e) => {
-      // console.log('sdfsdf', e);
-      if (optionsRef.current === e.target) {
+      if (loading || optionsRef.current === e.target) {
         return;
       }
       onSelect({ type: e.target.dataset.type, name: e.target.innerText });
       setKeyword('');
     },
-    [onSelect],
+    [loading, onSelect],
   );
-
-  // const handleOuterClick = useCallback((e) => {
-  //   console.log('estset', e);
-  // }, []);
-
-  // const handleBlur = useCallback(
-  //   (e) => {
-  //     if (typeof onBlur === 'function') {
-  //       onBlur(e.target.name);
-  //     }
-  //   },
-  //   [onBlur],
-  // );
 
   return (
     <AutoCompleteWrapper htmlFor={`search--${name}`}>
@@ -119,7 +105,6 @@ const AutoComplete = ({
           onChange={handleChange}
           autoComplete="off"
           colorType={colorType}
-          // onBlur={handleBlur}
         />
         {options && (
           <ValidOptionList
