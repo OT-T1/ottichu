@@ -7,7 +7,7 @@ const REQ_CONTENT_INFO = 'content/reqContentInfo';
 
 function* getContent(action) {
   try {
-    const user = action.payload;
+    const { user } = action.payload;
     const history = yield select(contentSelector.getContentHistory);
     const response = yield call(api.getContent, {
       user_code: user,

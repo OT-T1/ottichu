@@ -66,7 +66,7 @@ function* submitBasicInfo() {
     // 응답받은 사용자 코드 등록
     yield put(userActions.registerUserCode(response.user_code));
     // 컨텐츠 정보 요청
-    yield put(contentActions.reqContentInfo(response.user_code));
+    yield put(contentActions.reqContentInfo({ user: response.user_code }));
   } catch (e) {
     yield put(surveyActions.resSubmitBasic(reducerState.failure(e)));
   }
@@ -80,7 +80,7 @@ function* submitContent(action) {
     yield call(api.submitContent, { user_code: user, contents: submitData });
     yield put(surveyActions.resSubmitContent(reducerState.success()));
     if (!result) {
-      yield put(contentActions.reqContentInfo(user));
+      yield put(contentActions.reqContentInfo({ user }));
     } else {
       // TODO: 결과 요청 후 history push
       // yield put(contentActions.reqContentInfo());
