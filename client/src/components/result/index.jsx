@@ -47,7 +47,10 @@ const ResultPage = () => {
 
   return (
     <PageWrapper>
-      <StyledTitle>분석 결과</StyledTitle>
+      <TitleWrapper>
+        <img src="/images/ribbon-banner.png" alt="" />
+        <StyledTitle>OTT 추천 결과</StyledTitle>
+      </TitleWrapper>
       <StyledVisualSection>
         <PreferenceChart categories={result.category} />
         <KeywordCloud data={wordData} />
@@ -77,20 +80,33 @@ const PageWrapper = styled.div`
   align-items: center;
   justify-content: center;
   color: #eceff4;
+  font-family: 'Pretendard';
+`;
+
+const TitleWrapper = styled.div`
+  margin-top: 2em;
+  position: relative;
+
+  img {
+    width: 20vw;
+    height: auto;
+  }
 `;
 
 const StyledTitle = styled.span`
-  background: linear-gradient(90deg, #ac6aec 0%, #bb7ff5 100%);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -60%);
   text-align: center;
-  border-radius: 10px;
   width: 8em;
   height: 3em;
+
   font-family: 'Inter';
   font-style: normal;
   font-weight: 600;
-  font-size: 1.2em;
-  line-height: 3em;
-  color: #ffffff;
+  font-size: 1rem;
+  color: black;
 `;
 
 const StyledVisualSection = styled.section`

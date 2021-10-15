@@ -56,7 +56,6 @@ const options = {
       },
     },
     tooltip: {
-      // backgroundColor: 'rgba(124, 35, 35, 0.4)',
       padding: 10,
       bodySpacing: 5,
       usePointStyle: true,

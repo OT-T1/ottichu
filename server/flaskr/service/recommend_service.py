@@ -149,23 +149,31 @@ class Recommendation:
             len_actors = len(user_tastes["actors"])
 
             if len_directors == 0:
-                dum_direc_choice = random.sample(dummy_directors, 5 - len_directors)
+                dum_direc_choice = random.sample(dummy_directors, 5)
                 user_tastes["directors"] += dum_direc_choice
             if len_actors == 0:
-                dum_ac_choice = random.sample(dummy_actors, 5 - len_actors)
+                dum_ac_choice = random.sample(dummy_actors, 5)
                 user_tastes["actors"] += dum_ac_choice
 
             director_contents_codes = self.get_person_codes(user_tastes, "directors")
             actor_contents_codes = self.get_person_codes(user_tastes, "actors")
+            # prefilter 부분 : 감독, 배우 입력 값으로 해당하는 컨텐츠 코드 가져오기
 
-            d_codes = director_contents_codes
-            a_codes = actor_contents_codes
+            director_more_codes = self.get_similar_codes(
+                director_contents_codes, 10, mecab_data.model_tok
+            )
+            actor_more_codes = self.get_similar_codes(
+                actor_contents_codes, 10, mecab_data.model_tok
+            )
+
+            d_codes = director_contents_codes + director_more_codes
+            a_codes = actor_contents_codes + actor_more_codes
 
             result = []
             for d, a in zip(d_codes, a_codes):
-                if d not in history_codes:
+                if d not in history_codes and d not in result:
                     result.append(d)
-                if a not in history_codes:
+                if a not in history_codes and a not in result:
                     result.append(a)
 
             return result  # content_codes
@@ -179,24 +187,14 @@ class Recommendation:
 
             result = []
 
-            i = 1
-            len_n = 0
-            len_r = 10
-            while len(result) < 10:
-                new_codes = self.get_similar_codes(
-                    user_picked_codes, i, mecab_data.model_tok
-                )[len_n:]
-                if len_r > 0:
-                    rest_codes = self.get_first_contents(tastes, history_codes)[len_r:]
-                else:
-                    rest_codes = []
-                temp = new_codes + rest_codes
-                for t in temp:
-                    if t not in history_codes and t not in result:
-                        result.append(t)
-                len_n = len(new_codes)
-                len_r = len(rest_codes) - 10 * i
-                i += 1
+            new_codes = self.get_similar_codes(
+                user_picked_codes, 4, mecab_data.model_tok
+            )
+            for _ in range(3):
+                new_codes += self.get_similar_codes(new_codes, 3, mecab_data.model_tok)
+            for nc in new_codes:
+                if nc not in history_codes and nc not in result:
+                    result.append(nc)
 
             return result[:10]  ### content_codes
         except Exception as e:
@@ -205,23 +203,27 @@ class Recommendation:
 
     def get_result(self, final_codes):
         try:
-            result = final_codes
-            temp = self.get_similar_codes(result, 1, mecab_data.model_tok)
+            uf = final_codes
 
-            cnt = 1
-            while len(result) < 200:
-                prev_len = len(result)
-                for t in temp:
-                    if t not in result:
-                        result.append(t)
+            if len(uf) < 5:
+                cnt = 5
+            elif 5 <= len(uf) < 12:
+                cnt = 4
+            elif len(uf) >= 12:
+                cnt = 3
 
-                curr_len = len(result)
-                if prev_len == curr_len:
-                    cnt += 1
-                temp = self.get_similar_codes(
-                    result[prev_len - 1 :], cnt, mecab_data.model_tok
-                )
-            return final_codes[:200]
+            temp = self.get_similar_codes(uf, cnt, mecab_data.model_tok)
+            for _ in range(3):
+                uf += temp
+                temp = self.get_similar_codes(temp, cnt, mecab_data.model_tok)
+
+            result = []
+            for u in uf:
+                if u not in result:
+                    result.append(u)
+
+            return result[:200]
+
         except Exception as e:
             print("get_result", e)
             return False
@@ -420,9 +422,8 @@ class Recommendation:
                     pass
 
             user_embedding = np.array(user_embedding)
-            user = np.mean(user_embedding, axis=0)
 
-            return user
+            return user_embedding
 
         except Exception as e:
             print("make embedding", e)
