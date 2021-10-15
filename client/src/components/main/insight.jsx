@@ -7,7 +7,7 @@ import TvingGraph from './tvingGraph';
 import NetflixGraph from './netflixGraph';
 import WhatchaGraph from './whatchaGraph';
 
-export default function Insight({ clickHandler }) {
+export default function Insight({ handleStart }) {
   const [activeTab, setActiveTab] = useState(0);
 
   const tabHandler = (index) => {
@@ -87,7 +87,7 @@ export default function Insight({ clickHandler }) {
         있습니다! <br />
         사용자들의 니즈가 다른 걸 볼 수 있죠?
       </StyledDescription>
-      <StartBtn type="button" onClick={clickHandler}>
+      <StartBtn type="button" onClick={handleStart}>
         Start
       </StartBtn>
     </StyledSection>

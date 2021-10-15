@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import styled from 'styled-components';
 
-export default function Intro({ clickHandler }) {
+export default function Intro({ handleStart }) {
   return (
     <StyledSection>
       <StyledTitle>Find your OTT Right Now!</StyledTitle>
@@ -12,7 +12,7 @@ export default function Intro({ clickHandler }) {
         오띠츄와 함께 당신의 성향에 맞는 OTT플랫폼을 찾아보세요 😍
       </StyledDescription>
       <div>
-        <StartBtn type="button" onClick={clickHandler}>
+        <StartBtn type="button" onClick={handleStart}>
           Start
         </StartBtn>
         <MoreBtn type="button">자세히</MoreBtn>

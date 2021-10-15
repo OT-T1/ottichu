@@ -1,10 +1,10 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:5000/api';
+const BASE_URL = process.env.REACT_APP_API_BASE_URL;
 const createApi =
   (baseURL) =>
   (method) =>
-  (timeout = 1000) =>
+  (timeout = 10000) =>
   (url) =>
   async (data) => {
     try {

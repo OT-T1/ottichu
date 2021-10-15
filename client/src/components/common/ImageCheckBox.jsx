@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import styled, { css } from 'styled-components';
-// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-// import { faHeart } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faHeart } from '@fortawesome/free-solid-svg-icons';
 
 const ImageCheckBox = ({
   id,
@@ -14,17 +14,13 @@ const ImageCheckBox = ({
   onClick,
 }) => {
   const handleCheck = useCallback(
-    (e) => {
-      if (typeof onClick === 'function') {
-        onClick(e);
-      }
-    },
+    (e) => typeof onClick === 'function' && onClick(e),
     [onClick],
   );
 
   return (
     <StyledImgCheckBox
-      checked={defaultChecked === 'true'}
+      checked={defaultChecked}
       htmlFor={id}
       width={width}
       height={height}
@@ -37,32 +33,43 @@ const ImageCheckBox = ({
         onClick={handleCheck}
       />
       <img src={url} alt={name} />
-      {/* { && <FontAwesomeIcon icon={faHeart} />} */}
+      <FontAwesomeIcon
+        icon={faHeart}
+        color={defaultChecked ? '#e01f2d' : 'transparent'}
+      />
     </StyledImgCheckBox>
   );
 };
 
 const StyledImgCheckBox = styled.label`
+  position: relative;
   display: block;
   cursor: pointer;
-  opacity: 0.8;
-  border: ${(props) =>
-    props.checked ? 'solid 2px white' : 'solid 2px transparent'};
+  transition: all 300ms ease-in;
+  opacity: 0.5;
 
-  :hover {
-    opacity: 1;
-  }
+  ${(props) =>
+    props.checked &&
+    css`
+      opacity: 1;
+      transform: scale(1.1);
+    `}
 
   ${(props) =>
     props.width &&
     css`
       width: ${props.width};
     `}
-  ${(props) =>
+    ${(props) =>
     props.height &&
     css`
       height: ${props.height};
     `}
+    
+  :hover {
+    opacity: 1;
+    transform: scale(1.1);
+  }
 
   & > input {
     -webkit-appearance: none;
@@ -72,10 +79,8 @@ const StyledImgCheckBox = styled.label`
     padding: 0;
     width: 0;
     height: 0;
-    :checked {
-      background: black;
-    }
   }
+
   & > img {
     width: 100%;
     height: 100%;

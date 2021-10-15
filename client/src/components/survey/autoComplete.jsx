@@ -44,9 +44,9 @@ const AutoComplete = ({
       }
       if (e.code === 'ArrowUp' || e.code === 'ArrowDown') {
         e.preventDefault();
-        console.log(keyword);
-        const target = navigate(e.code);
+        // console.log(keyword);
         // optionsRef.current.scrollTo({ top: 16, behavior: 'smooth' });
+        const target = navigate(e.code);
         setOnHighlight(target);
         setKeyword(options[target]);
         return;
@@ -57,22 +57,22 @@ const AutoComplete = ({
           setKeyword('');
         }
       }
-      console.log('대상', e.target.value);
+      // console.log('대상', e.target.value);
       // console.log(options);
     },
-    [loading, options, onSelect, navigate, isNameValid, keyword],
+    [loading, options, onSelect, navigate, isNameValid],
   );
 
   const handleChange = useCallback(
     (e) => {
-      console.log('sdfsf', keyword, e.target.value);
+      // console.log('sdfsf', keyword, e.target.value);
       setKeyword(e.target.value);
       setOnHighlight(-1);
       if (typeof onChange === 'function' && e.target.value) {
         onChange({ type: e.target.name, name: e.target.value });
       }
     },
-    [onChange, keyword],
+    [onChange],
   );
 
   // OptionList handler
@@ -83,7 +83,7 @@ const AutoComplete = ({
 
   const handleClick = useCallback(
     (e) => {
-      console.log('sdfsdf', e);
+      // console.log('sdfsdf', e);
       if (optionsRef.current === e.target) {
         return;
       }

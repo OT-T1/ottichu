@@ -24,6 +24,7 @@ const StyledCheckBox = styled.label`
   cursor: pointer;
   color: white;
   word-break: keep-all;
+  transition: all 300ms ease-in;
   ${(props) =>
     props.colorType === 'orange' &&
     css`
@@ -44,6 +45,7 @@ const StyledCheckBox = styled.label`
       :hover {
         background: #7a7cff;
         border: 3px solid #7a7cff;
+        transform: scale(1.1);
       }
     `}
 
