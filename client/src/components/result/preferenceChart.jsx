@@ -3,6 +3,35 @@ import styled from 'styled-components';
 import { Pie } from 'react-chartjs-2';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
+const options = {
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      labels: {
+        color: '#ECEFF4',
+        usePointStyle: true,
+        padding: 10,
+        font: {
+          family: "'Pretendard', 'serif'",
+          lineHeight: 2,
+          size: 13,
+        },
+      },
+    },
+    datalabels: {
+      display: true,
+      align: 'bottom',
+      formatter(value) {
+        return `${value}%`;
+      },
+      font: {
+        size: 16,
+      },
+      color: '#2E3440',
+    },
+  },
+};
+
 export default function PreferenceChart({ categories }) {
   const [data, setData] = useState({ labels: [], datasets: [] });
   const [topGenres, setTopGenres] = useState('');
@@ -16,7 +45,6 @@ export default function PreferenceChart({ categories }) {
       percent.push(categories[category]),
     );
 
-    // percent가 max인 인덱스
     const isLargeNumber = (element) => element === Math.max(...percent);
     const index = percent.findIndex(isLargeNumber);
     setTopGenres(labels[index]);
@@ -42,35 +70,6 @@ export default function PreferenceChart({ categories }) {
 
     setData(newData);
   }, [categories]);
-
-  const options = {
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        labels: {
-          color: '#ECEFF4',
-          usePointStyle: true,
-          padding: 10,
-          font: {
-            family: "'Inter', 'serif'",
-            lineHeight: 2,
-            size: 13,
-          },
-        },
-      },
-      datalabels: {
-        display: true,
-        align: 'bottom',
-        formatter(value) {
-          return `${value}%`;
-        },
-        font: {
-          size: 16,
-        },
-        color: '#2E3440',
-      },
-    },
-  };
 
   const plugins = [ChartDataLabels];
 

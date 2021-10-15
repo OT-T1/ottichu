@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import WordCloud from 'react-d3-cloud';
 import styled from 'styled-components';
 
-const fontSize = (word) => word.value * 5;
+const fontSize = (word) => word.value;
 const rotate = (word) => ((word.value * 100) % 90) - 45;
 
 export default function KeywordCloud({ data }) {
@@ -18,24 +18,30 @@ export default function KeywordCloud({ data }) {
   return (
     <DataWrapper>
       <h1>워드클라우드</h1>
-      <WordCloud
-        data={newData}
-        fontSize={fontSize}
-        font="Pretendard"
-        rotate={rotate}
-        padding={2}
-        width={700}
-        height={400}
-        onWordClick={(event, d) => {
-          console.log(`onWordClick: ${d.text}`);
-        }}
-      />
+      <CloudWrapper>
+        <WordCloud
+          data={newData}
+          fontSize={fontSize}
+          font="Pretendard"
+          rotate={rotate}
+          padding={2}
+          width={700}
+          height={400}
+        />
+      </CloudWrapper>
     </DataWrapper>
   );
 }
 
 const DataWrapper = styled.div`
-  text-align: center;
   width: 50vw;
   height: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const CloudWrapper = styled.div`
+  width: 100%;
+  height: 100%;
 `;

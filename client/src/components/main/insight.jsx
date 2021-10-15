@@ -109,10 +109,11 @@ const StyledSection = styled.section`
   justify-content: center;
 
   position: relative;
+
+  font-family: 'Pretendard';
 `;
 
 const StyledDescription = styled.p`
-  font-family: Roboto;
   font-style: normal;
   font-weight: normal;
   font-size: 1.1em;
@@ -129,7 +130,6 @@ const HighlightedText = styled.span`
 
 const StartBtn = styled.button`
   display: inline;
-  font-family: 'Open Sans';
   font-style: normal;
   font-weight: bold;
   font-size: 2.2rem;
@@ -143,8 +143,6 @@ const StartBtn = styled.button`
   background: linear-gradient(88.75deg, #4a4bf8 0.73%, #ec58d4 102.47%);
   border-radius: 50em;
   border: 1px solid #2e3440;
-
-  /* margin-right: 1rem; */
 
   transition: transform 250ms ease-in-out;
 
@@ -203,25 +201,16 @@ const StyledTab = styled.ul`
       background: transparent;
       outline: 0;
       border: none;
-      /* border: none; */
-
-      /* background: linear-gradient(#0f0c1d, #0f0c1d) padding-box,
-        linear-gradient(88.75deg, #4a4bf8 0.73%, #ec58d4 102.47%) border-box;
-      border-radius: 50em;
-      border: 2px solid transparent; */
-      opacity: 0.6;
+      opacity: 0.7;
 
       :hover {
         background: transparent;
         border-color: white;
-        /* color: #9b9c9a; */
         opacity: 1;
-        /* transform: scale(1.1); */
       }
     }
 
     :hover {
-      /* color: #9b9c9a; */
       transform: scale(1.1);
     }
   }

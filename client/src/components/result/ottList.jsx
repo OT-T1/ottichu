@@ -55,22 +55,25 @@ const StyledTitle = styled.h3`
 `;
 
 const StyledDiv = styled.div`
-  /* border: 1px solid red; */
   width: 80%;
   display: flex;
   justify-content: center;
 
   img {
-    width: 20em;
-    height: 12em;
+    width: 100%;
+    height: 100%;
   }
 
   & > div:first-child {
     margin-right: 0.2em;
+    padding-bottom: 0;
+    background: linear-gradient(#0f0c1d, #0f0c1d) padding-box,
+      linear-gradient(88.75deg, #4a4bf8 0.73%, #ec58d4 102.47%) border-box;
+    border: 6px solid transparent;
   }
 
   & > div + div {
-    margin-right: 0.2em;
+    border: 6px solid transparent;
   }
 `;
 

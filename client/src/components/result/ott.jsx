@@ -2,10 +2,8 @@ import React, { useEffect } from 'react';
 import styled from 'styled-components';
 
 const Ott = ({ ottData }) => {
-  // TODO: delete this
   useEffect(() => {
-    console.log('eslint 방지용');
-    console.log(`💩 ${ottData.plan}`);
+    console.log('eslint 방지');
   }, [ottData]);
 
   return (
@@ -22,24 +20,22 @@ const StyledDiv = styled.div`
   position: absolute;
   top: 0;
   left: 0;
-  width: 20em;
-  height: 12em;
+  width: 100%;
+  height: 100%;
   transition: all 200ms ease-in;
-  transform: translateY(10px);
   opacity: 0;
   color: white;
-  line-height: 1.4em;
 
   p {
     margin: 0;
-    margin-top: 1.8em;
+    margin-top: 1.6em;
     font-family: 'Pretendard';
+    font-size: 1.4rem;
   }
 
   :hover {
     opacity: 0.8;
     background: #0000008d;
-    transform: translateY(0px);
   }
 `;
 
