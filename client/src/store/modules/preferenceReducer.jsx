@@ -47,9 +47,14 @@ const preferenceSlice = createSlice({
     clearActorsDirectors(state, action) {
       const { type } = action.payload;
       if (type === 'actors') {
+        state.validDirectors.data = null;
+        state.directorKeyword = '';
+      } else if (type === 'directors') {
         state.vaildActors.data = null;
         state.actorKeyword = '';
       } else {
+        state.vaildActors.data = null;
+        state.actorKeyword = '';
         state.validDirectors.data = null;
         state.directorKeyword = '';
       }

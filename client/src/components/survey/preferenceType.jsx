@@ -4,20 +4,18 @@ import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimesCircle } from '@fortawesome/free-solid-svg-icons';
 import { actions, selector } from '../../store/modules';
-import { handleScrollSlide } from '../../utils';
 import CheckBox from '../common/checkBox';
 import AutoComplete from './autoComplete';
 
 // const MAX_SELECT_COUNT = 5;
 
-const PreferenceType = ({ fullpageApi }) => {
+const PreferenceType = () => {
   const dispatch = useDispatch();
   const selectedCategories = useSelector(selector.getSelectedCategories);
   const validDirectors = useSelector(selector.getValidDirectors);
   const validActors = useSelector(selector.getValidActors);
   const selectedActors = useSelector(selector.getSelectedActors);
   const selectedDirectors = useSelector(selector.getSelectedDirectors);
-  const isPreferenceAnswered = useSelector(selector.isPreferenceAnswered);
   const CATEGORY_TYPES = useMemo(
     () => [
       { id: 'ctgry--movie', type: 'movie', label: '영화' },
@@ -64,109 +62,111 @@ const PreferenceType = ({ fullpageApi }) => {
   );
 
   const handleBlurAD = useCallback(
-    (type) => {
-      handleScrollSlide(fullpageApi)(true, 'up');
-      handleScrollSlide(fullpageApi)(isPreferenceAnswered, 'down');
-      dispatch(actions.clearActorsDirectors({ type }));
-    },
-    [dispatch, fullpageApi, isPreferenceAnswered],
+    (e) => dispatch(actions.clearActorsDirectors({ type: e.target.name })),
+    [dispatch],
   );
 
   return (
-    <StyledPreference>
-      <StyledFieldName>
-        <li>
-          즐겨보는
-          <br />
-          카테고리
-        </li>
-        <li>
-          좋아하는 <br /> 감독 및 제작자
-        </li>
-        <li>
-          좋아하는 <br /> 배우 및 출연진
-        </li>
-      </StyledFieldName>
-      <StyledControlBox>
-        <StyledCategories>
-          <legend>즐겨보는 카테고리</legend>
-          <StyledCheckBoxWrapper>
-            {CATEGORY_TYPES.map(({ id, label, type }) => (
-              <CheckBox
-                key={id}
-                id={id}
-                label={label}
-                value={type}
-                defaultChecked={!!selectedCategories[type]}
-                onClick={handleContent}
-                colorType="orange"
+    <StyledPreferenceWrapper onClick={handleBlurAD}>
+      <StyledPreference>
+        <StyledFieldName>
+          <li>
+            즐겨보는
+            <br />
+            카테고리
+          </li>
+          <li>
+            좋아하는 <br /> 감독 및 제작자
+          </li>
+          <li>
+            좋아하는 <br /> 배우 및 출연진
+          </li>
+        </StyledFieldName>
+        <StyledControlBox>
+          <StyledCategories>
+            <legend>즐겨보는 카테고리</legend>
+            <StyledCheckBoxWrapper>
+              {CATEGORY_TYPES.map(({ id, label, type }) => (
+                <CheckBox
+                  key={id}
+                  id={id}
+                  label={label}
+                  value={type}
+                  defaultChecked={!!selectedCategories[type]}
+                  onClick={handleContent}
+                  colorType="orange"
+                />
+              ))}
+            </StyledCheckBoxWrapper>
+          </StyledCategories>
+          <StyledAutoCompleteWrapper>
+            <StyledAutoComplete>
+              <AutoComplete
+                name="directors"
+                label="좋아하는 감독"
+                text="감독 이름을 한글로 입력하세요."
+                loading={validDirectors.loading}
+                options={validDirectors.data} // TODO: Add data[id]
+                onChange={handleChangeAD}
+                onSelect={handleSelectAD}
+                colorType="basic"
               />
-            ))}
-          </StyledCheckBoxWrapper>
-        </StyledCategories>
-        <StyledAutoCompleteWrapper>
-          <StyledAutoComplete>
-            <AutoComplete
-              name="directors"
-              label="좋아하는 감독"
-              text="감독 이름을 한글로 입력하세요."
-              loading={validDirectors.loading}
-              options={validDirectors.data} // TODO: Add data[id]
-              onChange={handleChangeAD}
-              onSelect={handleSelectAD}
-              onBlur={handleBlurAD}
-              colorType="basic"
-            />
-          </StyledAutoComplete>
-          <StyledSelectedListWrapper onClick={handleDeleteAD}>
-            {selectedDirectors &&
-              selectedDirectors.map((director) => (
-                <li
-                  key={director}
-                  name={director}
-                  data-type="directors"
-                  data-name={director}
-                >
-                  {`${director} `}
-                  <FontAwesomeIcon icon={faTimesCircle} />
-                </li>
-              ))}
-          </StyledSelectedListWrapper>
-        </StyledAutoCompleteWrapper>
-        <StyledAutoCompleteWrapper>
-          <StyledAutoComplete>
-            <AutoComplete
-              name="actors"
-              label="좋아하는 배우"
-              text="배우 이름을 한글로 입력하세요."
-              loading={validActors.loading} // TODO: Add data[id]
-              options={validActors.data} // TODO: Add data[id]
-              onChange={handleChangeAD}
-              onSelect={handleSelectAD}
-              // onFocus={handleFocus}
-              onBlur={handleBlurAD}
-              colorType="basic"
-            />
-          </StyledAutoComplete>
-          <StyledSelectedListWrapper onClick={handleDeleteAD}>
-            {selectedActors &&
-              selectedActors.map((actor) => (
-                <li
-                  key={actor}
-                  name={actor}
-                  data-type="actors"
-                  data-name={actor}
-                >
-                  {`${actor} `}
-                  <FontAwesomeIcon icon={faTimesCircle} />
-                </li>
-              ))}
-          </StyledSelectedListWrapper>
-        </StyledAutoCompleteWrapper>
-      </StyledControlBox>
-    </StyledPreference>
+            </StyledAutoComplete>
+            <StyledSelectedListWrapper onClick={handleDeleteAD}>
+              {selectedDirectors &&
+                selectedDirectors.map((director) => (
+                  <li
+                    key={director}
+                    name={director}
+                    data-type="directors"
+                    data-name={director}
+                  >
+                    {`${director} `}
+                    <FontAwesomeIcon icon={faTimesCircle} />
+                  </li>
+                ))}
+            </StyledSelectedListWrapper>
+          </StyledAutoCompleteWrapper>
+          <StyledAutoCompleteWrapper>
+            <StyledAutoComplete>
+              <AutoComplete
+                name="actors"
+                label="좋아하는 배우"
+                text="배우 이름을 한글로 입력하세요."
+                loading={validActors.loading} // TODO: Add data[id]
+                options={validActors.data} // TODO: Add data[id]
+                onChange={handleChangeAD}
+                onSelect={handleSelectAD}
+                colorType="basic"
+              />
+            </StyledAutoComplete>
+            <StyledSelectedListWrapper onClick={handleDeleteAD}>
+              {selectedActors &&
+                selectedActors.map((actor) => (
+                  <li
+                    key={actor}
+                    name={actor}
+                    data-type="actors"
+                    data-name={actor}
+                  >
+                    {`${actor} `}
+                    <FontAwesomeIcon icon={faTimesCircle} />
+                  </li>
+                ))}
+            </StyledSelectedListWrapper>
+          </StyledAutoCompleteWrapper>
+        </StyledControlBox>
+      </StyledPreference>
+    </StyledPreferenceWrapper>
   );
 };
+
+const StyledPreferenceWrapper = styled.div`
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+`;
 
 const StyledPreference = styled.div`
   width: 100vw;

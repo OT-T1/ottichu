@@ -80,6 +80,7 @@ const SurveyPage = () => {
       if (destination.isLast) {
         if (!hasBasicInfoSubmited) {
           dispatch(actions.reqSubmitBasic());
+          return;
         }
         if (!isContentAnswered) {
           dispatch(actions.reqContentInfo(user));
@@ -152,12 +153,11 @@ const StyledFooter = styled.footer`
   justify-content: center;
   align-items: center;
   position: fixed;
-  width: 100%;
+  transform: translateX(50vw);
   height: 15vh;
   bottom: 0;
-  z-index: 1;
   text-align: center;
-  transition: all 0.5s ease-in;
+  transition: animation 0.5s ease-in;
   & > svg {
     opacity: 0.5;
   }
