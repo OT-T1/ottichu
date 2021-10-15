@@ -78,8 +78,11 @@ const FavoriteContent = ({ fullpageApi }) => {
   }, [openPopup, goResult, isContentAnswered, contentSubmitCnt]);
 
   const handleRefresh = useCallback(() => {
+    if (loading) {
+      return;
+    }
     dispatch(actions.reqContentInfo({ user, refresh: true }));
-  }, [dispatch, user]);
+  }, [dispatch, user, loading]);
 
   const closeAlarm = useCallback(
     (action) => () => {
