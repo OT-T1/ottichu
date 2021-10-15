@@ -32,6 +32,7 @@ const StyledRadioBtn = styled.label`
   cursor: pointer;
   color: white;
   word-break: keep-all;
+  transition: all 300ms ease-in;
   ${(props) =>
     props.colorType === 'orange' &&
     css`
@@ -42,6 +43,7 @@ const StyledRadioBtn = styled.label`
       :hover {
         background: transparent;
         border: 3px solid #e810b9;
+        transform: scale(1.1);
       }
     `}
   ${(props) =>
@@ -52,6 +54,7 @@ const StyledRadioBtn = styled.label`
       :hover {
         background: #7a7cff;
         border: 3px solid #7a7cff;
+        transform: scale(1.1);
       }
     `}
 

@@ -12,6 +12,7 @@ class Result:
         # 비슷한 상위 200개의 컨텐츠
         result_data = recom.get_result(user_data["contents"])
         # 장르
+        result_diagram = recom.get_diagram(result_data)
         top_genre = recom.get_top_genre(result_data)
         # ott추천정도
         top_platform = recom.get_ott_recommendation(result_data)
@@ -43,14 +44,16 @@ class Result:
                         reverse=True,
                     )
                 ),
+                diagram=result_diagram,
             ),
             200,
         )
 
     def get_wordcloud(user_code):
         recom = Recommendation()
-        result_data, _ = recom.get_user_data(user_code)
-        tokens = recom.for_wordcloud(result_data["contents"])
+        user_data, _ = recom.get_user_data(user_code)
+        result_data = recom.get_result(user_data["contents"])
+        tokens = recom.for_wordcloud(result_data)
         token_cnt = Counter(tokens.split())
         for word in ["그", "것", "이"]:
             try:

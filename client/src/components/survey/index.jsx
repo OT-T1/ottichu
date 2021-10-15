@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import ReactFullpage from '@fullpage/react-fullpage';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import StepBar from './stepBar';
 import SectionLayout from './sectionLayout';
 import UserInfo from './userInfo';
@@ -11,19 +12,21 @@ import PreferenceType from './preferenceType';
 import { handleLeave, handleScrollSlide } from '../../utils';
 import OttTerms from './ottTerms';
 import FavoriteContent from './favoriteContent';
-import StyledBtn from '../common/styledBtn';
 
-const STORE_DELAY = 30000;
+const STORE_DELAY = 20000;
 
 const SurveyPage = () => {
-  const history = useHistory();
   const dispatch = useDispatch();
   const user = useSelector(selector.getUser);
   const sectionIndex = useSelector(selector.getSurveySectionIndex);
   const isSectionCompleted = useSelector(selector.isSectionCompleted);
   const hasBasicInfoSubmited = useSelector(selector.hasBasicInfoSubmited);
-  const hasContentSubmited = useSelector(selector.hasContentSubmited);
+  const isContentAnswered = useSelector(selector.isContentAnswered);
   const anchors = useMemo(() => ['1', '2', '3', '4'], []);
+  const lastIndex = useMemo(
+    () => (anchors ? anchors.length - 1 : -1),
+    [anchors],
+  );
   const SETIONS = useMemo(
     () => [
       {
@@ -79,42 +82,16 @@ const SurveyPage = () => {
           dispatch(actions.reqSubmitBasic());
           return;
         }
-        dispatch(actions.reqContentInfo(user));
+        if (!isContentAnswered) {
+          dispatch(actions.reqContentInfo({ user }));
+        }
       }
     },
-    [dispatch, user, hasBasicInfoSubmited],
+    [dispatch, user, hasBasicInfoSubmited, isContentAnswered],
   );
 
-  const handleNext = useCallback(() => {
-    if (!isSectionCompleted) {
-      window.alert('현재 페이지의 컨텐츠를 선택한 후 다시 시도해주세요.');
-      return;
-    }
-    dispatch(actions.reqSubmitContent({ result: false }));
-  }, [dispatch, isSectionCompleted]);
-
-  const moveResultPage = useCallback(() => {
-    if (!hasContentSubmited && !isSectionCompleted) {
-      // TODO: 응답 요청 메시지 출력하도록!
-      return;
-    }
-    // TODO: Request result to Api url
-    dispatch(actions.reqSubmitContent({ result: true }));
-    history.replace('/result');
-  }, [history, dispatch, isSectionCompleted, hasContentSubmited]);
-
-  const handleRefresh = useCallback(() => {
-    dispatch(actions.reqContentInfo(user));
-  }, [dispatch, user]);
-
-  // <FontAwesomeIcon icon={faRedo} color="white" />
   return (
     <>
-      <StyledHeader hidden={sectionIndex !== SETIONS.length - 1}>
-        <RefreshButton type="button" onClick={handleRefresh}>
-          Refresh
-        </RefreshButton>
-      </StyledHeader>
       <main role="main">
         <StyledStepBarWrapper>
           <StepBar
@@ -148,57 +125,17 @@ const SurveyPage = () => {
               </ReactFullpage.Wrapper>
             )}
           />
-          <StyledBtnWrapper hidden={sectionIndex !== SETIONS.length - 1}>
-            <StyledBtn
-              type="button"
-              text="Result"
-              onClick={moveResultPage}
-              colorType="stylish"
-            />
-            <StyledBtn
-              type="button"
-              text="Next"
-              onClick={handleNext}
-              colorType="stylish"
-            />
-          </StyledBtnWrapper>
         </div>
       </main>
+      <StyledFooter
+        activate={isSectionCompleted}
+        hidden={sectionIndex === lastIndex}
+      >
+        <FontAwesomeIcon size="2x" icon={faChevronDown} color="white" />
+      </StyledFooter>
     </>
   );
 };
-
-const StyledHeader = styled.header`
-  position: fixed;
-  text-align: right;
-  width: 100%;
-  z-index: 10;
-  animation: 2s ease-in-out normal fadein;
-  @keyframes fadein {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-`;
-
-const RefreshButton = styled.button`
-  cursor: pointer;
-  outline: 0;
-  border: 0;
-  background: none;
-  line-height: 20vh;
-  margin-right: 10vw;
-  font-size: 1.5rem;
-  color: white;
-  font-family: 'Shadows Into Light', cursive;
-  transition: all 300ms ease-in;
-  :hover {
-    transform: scale(1.1);
-  }
-`;
 
 const StyledStepBarWrapper = styled.aside`
   display: flex;
@@ -210,27 +147,40 @@ const StyledStepBarWrapper = styled.aside`
   z-index: 1;
 `;
 
-const StyledBtnWrapper = styled.div`
-  width: 100%;
-  height: 20vh;
-  text-align: center;
+const StyledFooter = styled.footer`
+  display: ${(props) => (props.hidden ? 'none' : 'flex')};
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   position: fixed;
-  line-height: 20vh;
+  transform: translateX(50vw);
+  height: 15vh;
   bottom: 0;
-  animation: 2s ease-in-out normal fadein;
-  @keyframes fadein {
-    // 임시
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
+  text-align: center;
+  transition: animation 0.5s ease-in;
+  & > svg {
+    opacity: 0.5;
   }
 
-  & > button {
-    margin: 0 3vw;
-  }
+  ${(props) =>
+    props.activate &&
+    css`
+      & > svg {
+        animation: 1s ease-in infinite alternate highlight_one;
+      }
+
+      @keyframes highlight_one {
+        0% {
+          opacity: 0.5;
+        }
+        50% {
+          opacity: 0.8;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+    `}
 `;
 
 export default SurveyPage;

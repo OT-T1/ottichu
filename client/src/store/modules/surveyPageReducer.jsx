@@ -11,7 +11,7 @@ const initialState = {
   sectionIndex: 0,
   submitLog: {
     basic: reducerState.initial(false),
-    content: reducerState.initial(false),
+    content: reducerState.initial(0),
   },
 };
 
@@ -59,9 +59,11 @@ const surveySlice = createSlice({
       );
     },
     resSubmitContent(state, action) {
-      const { loading, data, error } = action.payload;
+      const { loading, error } = action.payload;
       state.submitLog.content.loading = loading;
-      state.submitLog.content.data = !!data || state.submitLog.content.data;
+      state.submitLog.content.data = error
+        ? state.submitLog.content.data
+        : state.submitLog.content.data + 1;
       state.submitLog.content.error = error;
     },
   },
@@ -71,7 +73,7 @@ const getSchedulerId = (state) => state.survey.schedulerId;
 const getSurveyPageStatus = (state) => state.survey.isLoading;
 const getSurveySectionIndex = (state) => state.survey.sectionIndex;
 const hasBasicInfoSubmited = (state) => !!state.survey.submitLog.basic.data;
-const hasContentSubmited = (state) => state.survey.submitLog.content.data;
+const getContentSubmitCnt = (state) => state.survey.submitLog.content.data;
 
 const getSurveySectionState = createSelector(
   [
@@ -79,12 +81,13 @@ const getSurveySectionState = createSelector(
     preferenceSelector.isPreferenceAnswered,
     ottTermsSelector.isOttTermsAnswered,
     contentSelector.isContentAnswered,
+    getContentSubmitCnt,
   ],
-  (user, preference, ottTerms, content) => [
+  (user, preference, ottTerms, content, contentSubmitCnt) => [
     user,
     preference,
     ottTerms,
-    content,
+    contentSubmitCnt || content,
   ],
 );
 const isSectionCompleted = createSelector(
@@ -92,7 +95,7 @@ const isSectionCompleted = createSelector(
   (section, state) => state[section],
 );
 const getSurveyInfo = createSelector(
-  [getSurveySectionIndex, hasBasicInfoSubmited, hasContentSubmited],
+  [getSurveySectionIndex, hasBasicInfoSubmited, getContentSubmitCnt],
   (sectionIndex, basicSubmitLog, contentSubmitLog) => ({
     section: sectionIndex,
     'basic-submit': basicSubmitLog,
@@ -108,7 +111,7 @@ export const surveySelector = {
   hasBasicInfoSubmited,
   getSurveySectionState,
   isSectionCompleted,
-  hasContentSubmited,
+  getContentSubmitCnt,
   getSurveyInfo,
 };
 export default surveySlice.reducer;

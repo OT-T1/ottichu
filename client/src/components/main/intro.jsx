@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import styled from 'styled-components';
 
-export default function Intro({ clickHandler }) {
+export default function Intro({ handleStart }) {
   return (
     <StyledSection>
       <StyledTitle>Find your OTT Right Now!</StyledTitle>
@@ -12,7 +12,7 @@ export default function Intro({ clickHandler }) {
         오띠츄와 함께 당신의 성향에 맞는 OTT플랫폼을 찾아보세요 😍
       </StyledDescription>
       <div>
-        <StartBtn type="button" onClick={clickHandler}>
+        <StartBtn type="button" onClick={handleStart}>
           Start
         </StartBtn>
         <MoreBtn type="button">자세히</MoreBtn>
@@ -61,7 +61,7 @@ const StyledDescription = styled.p`
   font-family: 'Roboto';
   font-style: normal;
   font-weight: normal;
-  font-size: 1.6rem;
+  font-size: 1.1rem;
   text-align: center;
 
   color: #fffdfd;
@@ -75,14 +75,14 @@ const StartBtn = styled.button`
   font-family: 'Open Sans';
   font-style: normal;
   font-weight: bold;
-  font-size: 2.6rem;
+  font-size: 2.2rem;
   text-align: center;
 
   cursor: pointer;
 
   color: #ffffff;
-  width: 13rem;
-  height: 5rem;
+  width: 10rem;
+  height: 4rem;
   background: linear-gradient(88.75deg, #4a4bf8 0.73%, #ec58d4 102.47%);
   border-radius: 50em;
   border: 1px solid #2e3440;
@@ -101,24 +101,31 @@ const StartBtn = styled.button`
 const MoreBtn = styled.button`
   display: inline;
 
-  width: 13rem;
-  height: 5rem;
-  border: 4px solid
-      adial-gradient(69.83% 54.69% at 50% 7.13%, #1d2442 0%, #0f0c1d 100%),
-    #594fa9;
-  border-radius: 50px;
+  width: 10rem;
+  height: 4rem;
 
-  background: transparent;
+  border: 4px solid;
+
+  background: linear-gradient(#0f0c1d, #0f0c1d) padding-box,
+    linear-gradient(88.75deg, #4a4bf8 0.73%, #ec58d4 102.47%) border-box;
+  border-radius: 50em;
+  border: 4px solid transparent;
 
   font-family: 'Open Sans';
   font-style: normal;
   font-weight: bold;
-  font-size: 2rem;
-  /* line-height: 65px; */
+  font-size: 1.6rem;
   text-align: center;
-  border: 1px solid white;
 
   color: #ffffff;
+
+  transition: transform 250ms ease-in-out;
+
+  :hover {
+    transform: scale(1.1);
+    background: transparent;
+    border: 4px solid #e810b9;
+  }
 `;
 
 // const StyledArrow = styled(faChevronDown)`

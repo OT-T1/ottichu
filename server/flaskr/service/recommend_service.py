@@ -1,5 +1,5 @@
+import random
 import re
-import time
 
 import numpy as np
 import pandas as pd
@@ -46,12 +46,8 @@ class Recommendation:
                 tmp.append("TV 프로그램")
 
             tastes = {
-                "directors": [director.director for director in t_user_directors]
-                if len(t_user_directors) != 0
-                else ["봉준호", "김태호"],
-                "actors": [actor.actor for actor in t_user_actors]
-                if len(t_user_actors) != 0
-                else ["유재석", "송강호"],
+                "directors": [director.director for director in t_user_directors],
+                "actors": [actor.actor for actor in t_user_actors],
                 "category": tmp,
                 "contents": [content.content_code for content in t_user_contents],
             }
@@ -68,64 +64,109 @@ class Recommendation:
 
     def get_first_contents(self, tastes, history_codes):
         try:
-            # 선택한 감독과 배우가 둘다 없다면
-            if len(tastes["actors"]) == 0 and len(tastes["directors"] == 0):
-                tastes["actors"] = ["이정재"]  # 한 달 간 가장 언급 많이 된 배우
-                tastes["directors"] = ["봉준호"]
+            user_tastes = tastes
+            dummy_tv_directors = ["김태호", "나영석", "유제원", "신원호", "이응복", "김원석"]
+            dummy_mv_directors = [
+                "류승완",
+                "봉준호",
+                "박찬욱",
+                "이병헌",
+                "최동훈",
+                "안소니 루소",
+                "조 루소",
+                "김한민",
+                "크리스토퍼 놀란",
+                "황동혁",
+                "이상근",
+                "이일형",
+            ]
+            dummy_tv_actors = [
+                "박보검",
+                "유재석",
+                "강호동",
+                "신동엽",
+                "송혜교",
+                "송중기",
+                "공유",
+                "조정석",
+                "나문희",
+                "이지아",
+                "김소연",
+                "유진",
+                "엄기준",
+                "박해수",
+                "유연석",
+                "정경호",
+                "전미도",
+                "김고은",
+            ]
+            dummy_mv_actors = [
+                "전지현",
+                "김혜수",
+                "박정민",
+                "양조위",
+                "스칼렛 요한슨",
+                "조승우",
+                "주지훈",
+                "설경구",
+                "로버트 다우니 주니어",
+                "구교환",
+                "신민아",
+                "크리스 에반스",
+                "마크 러팔로",
+                "크리스 헴스워스",
+                "제레미 레너",
+                "브리 라슨",
+                "조슈 브롤린",
+                "최민식",
+                "류승룡",
+                "하정우",
+                "이정재",
+                "공유",
+                "마동석",
+                "임윤아",
+                "조정석",
+                "매튜 매커너히",
+                "앤 해서웨이",
+                "마이클 케인",
+                "제시카 차스테인",
+                "나문희",
+                "심은경",
+                "김고은",
+            ]
 
-            # prefilter 부분 : 감독, 배우 입력 값으로 해당하는 컨텐츠 코드 가져오기
+            dummy_actors = []
+            dummy_directors = []
+            for category in user_tastes["category"]:
+                if category == "TV 프로그램":
+                    dummy_actors += dummy_tv_actors
+                    dummy_directors += dummy_tv_directors
+                elif category == "영화":
+                    dummy_actors += dummy_mv_actors
+                    dummy_directors += dummy_mv_directors
 
-            # 1) direcctor vector 생성 후 배우별 대표작 뽑기
-            director_contents_codes = self.get_person_codes(
-                tastes, "directors", mecab_data.model_director_tok
-            )
-            # 2) actor vector 생성 후 배우별 대표작 뽑기
-            actor_contents_codes = self.get_person_codes(
-                tastes, "actors", mecab_data.model_actor_tok
-            )
+            len_directors = len(user_tastes["directors"])
+            len_actors = len(user_tastes["actors"])
 
-            # 감독, 배우 컨텐츠 코드 모자라니까 더 만드는 부분(new)
-            directors_other_codes = self.get_other_codes(
-                director_contents_codes, mecab_data.model_director_tok
-            ) + self.get_similar_codes(
-                director_contents_codes, 2, mecab_data.model_director_tok
-            )
-            actors_other_codes = self.get_other_codes(
-                actor_contents_codes, mecab_data.model_actor_tok
-            ) + self.get_similar_codes(
-                actor_contents_codes, 2, mecab_data.model_actor_tok
-            )
+            if len_directors == 0:
+                dum_direc_choice = random.sample(dummy_directors, 5 - len_directors)
+                user_tastes["directors"] += dum_direc_choice
+            if len_actors == 0:
+                dum_ac_choice = random.sample(dummy_actors, 5 - len_actors)
+                user_tastes["actors"] += dum_ac_choice
 
-            d_codes = director_contents_codes + directors_other_codes
-            a_codes = actor_contents_codes + actors_other_codes
+            director_contents_codes = self.get_person_codes(user_tastes, "directors")
+            actor_contents_codes = self.get_person_codes(user_tastes, "actors")
 
-            length = min(len(d_codes), len(a_codes))
+            d_codes = director_contents_codes
+            a_codes = actor_contents_codes
 
             result = []
-
-            for d, c in zip(d_codes[:length], a_codes[:length]):
-                if d not in history_codes and d not in result:
+            for d, a in zip(d_codes, a_codes):
+                if d not in history_codes:
                     result.append(d)
-                if c not in history_codes and c not in result:
-                    result.append(c)
-
-            more_directors_codes = self.get_other_codes(
-                directors_other_codes, mecab_data.model_director_tok
-            )
-            more_actors_codes = self.get_other_codes(
-                actors_other_codes, mecab_data.model_actor_tok
-            )
-
-            m_len = min(len(more_directors_codes), len(more_actors_codes))
-
-            while len(result) < 10:
-                for j in range(m_len):
-                    d_code = more_directors_codes[j]
-                    a_code = more_actors_codes[j]
-                    if d_code not in history_codes and d_code not in result:
-                        result.append(d_code)
-                    if a_code not in history_codes and a_code not in result:
-                        result.append(a_code)
+                if a not in history_codes:
+                    result.append(a)
 
             return result  # content_codes
         except Exception as e:
@@ -135,6 +176,7 @@ class Recommendation:
     def get_other_10_contents(self, tastes, history_codes):
         try:
             user_picked_codes = tastes["contents"]
+
             result = []
 
             i = 1
@@ -163,10 +205,22 @@ class Recommendation:
 
     def get_result(self, final_codes):
         try:
-            while len(final_codes) < 200:
-                temp = self.get_similar_codes(final_codes, 3, mecab_data.model_tok)
-                final_codes += temp
+            result = final_codes
+            temp = self.get_similar_codes(result, 1, mecab_data.model_tok)
 
+            cnt = 1
+            while len(result) < 200:
+                prev_len = len(result)
+                for t in temp:
+                    if t not in result:
+                        result.append(t)
+
+                curr_len = len(result)
+                if prev_len == curr_len:
+                    cnt += 1
+                temp = self.get_similar_codes(
+                    result[prev_len - 1 :], cnt, mecab_data.model_tok
+                )
             return final_codes[:200]
         except Exception as e:
             print("get_result", e)
@@ -180,7 +234,6 @@ class Recommendation:
             ott_counts = dict()
             for idx, is_ott in enumerate(otts):
                 val = count[{is_ott}].sum().values[0]
-                print(f"{is_ott}", val)
                 ott_counts[ott[idx]] = val
 
             return ott_counts
@@ -254,22 +307,16 @@ class Recommendation:
             print("get_similar_codes", e)
             return False
 
-    def get_person_codes(self, tastes, jobtype, model):
+    def get_person_codes(self, tastes, jobtype):
         try:
-            contents_codes = []
-
             for person in tastes[jobtype]:
                 picked = (
                     mecab_data.data["content_code"]
                     .loc[mecab_data.data[jobtype].astype(str).str.contains(f"{person}")]
                     .values.tolist()
                 )
-                embedded_pick = self.make_embedding(picked, model)
-                representations = model.dv.most_similar(embedded_pick, topn=2)
 
-                contents_codes += [rep[0] + 1 for rep in representations]
-
-            return contents_codes
+            return picked
         except Exception as e:
             print("get_person_codes", e)
             return False
@@ -426,3 +473,52 @@ class Recommendation:
         except Exception as e:
             print("get_price_info", e)
             return False
+
+    def get_diagram(self, result):
+        try:
+            otts = self.count_by_ott(result)
+            otts = sorted(otts.items(), key=lambda x: x[1], reverse=True)
+            # 상위 3개만 선별
+            ott_rank = [ott[0] for ott in otts][:3]
+
+            diagram_val = {
+                ott_rank[0]: int(otts[0][1]),
+                ott_rank[1]: int(otts[1][1]),
+                ott_rank[2]: int(otts[2][1]),
+            }
+
+            query = []
+            for ott in ott_rank:
+                q = f"is_{ott}"
+                query.append(q)
+
+            contents = mecab_data.data.loc[mecab_data.data["content_code"].isin(result)]
+
+            rank_1_2 = contents.loc[
+                (contents[query[0]] == 1) & (contents[query[1]] == 1)
+            ]
+
+            rank_1_3 = contents.loc[
+                (contents[query[0]] == 1) & (contents[query[2]] == 1)
+            ]
+
+            rank_2_3 = contents.loc[
+                (contents[query[1]] == 1) & (contents[query[2]] == 1)
+            ]
+
+            rank_1_2_3 = contents.loc[
+                (contents[query[0]] == 1)
+                & (contents[query[1]] == 1)
+                & (contents[query[2]] == 1)
+            ]
+
+            diagram_val[f"{ott_rank[0]}&{ott_rank[1]}"] = len(rank_1_2.index)
+            diagram_val[f"{ott_rank[0]}&{ott_rank[2]}"] = len(rank_1_3.index)
+            diagram_val[f"{ott_rank[1]}&{ott_rank[2]}"] = len(rank_2_3.index)
+            diagram_val[f"{ott_rank[0]}&{ott_rank[1]}&{ott_rank[2]}"] = len(
+                rank_1_2_3.index
+            )
+
+            return diagram_val
+        except Exception as e:
+            print("get_diagram", e)

@@ -7,7 +7,7 @@ import TvingGraph from './tvingGraph';
 import NetflixGraph from './netflixGraph';
 import WhatchaGraph from './whatchaGraph';
 
-export default function Insight({ clickHandler }) {
+export default function Insight({ handleStart }) {
   const [activeTab, setActiveTab] = useState(0);
 
   const tabHandler = (index) => {
@@ -79,15 +79,17 @@ export default function Insight({ clickHandler }) {
 
   return (
     <StyledSection>
-      <StyledTab>{tabContentsList.map((chart) => chart.tabTitle)}</StyledTab>
-      {tabContentsList[activeTab].tabContent}
+      <TabWrapper>
+        <StyledTab>{tabContentsList.map((chart) => chart.tabTitle)}</StyledTab>
+        {tabContentsList[activeTab].tabContent}
+      </TabWrapper>
       <StyledDescription>
         <HighlightedText>OTT별 검색 횟수</HighlightedText>와 각 OTT의{' '}
         <HighlightedText>연관검색어 1위</HighlightedText>를 확인해보실 수
         있습니다! <br />
         사용자들의 니즈가 다른 걸 볼 수 있죠?
       </StyledDescription>
-      <StartBtn type="button" onClick={clickHandler}>
+      <StartBtn type="button" onClick={handleStart}>
         Start
       </StartBtn>
     </StyledSection>
@@ -113,7 +115,7 @@ const StyledDescription = styled.p`
   font-family: Roboto;
   font-style: normal;
   font-weight: normal;
-  font-size: 1.5em;
+  font-size: 1.1em;
   line-height: 28px;
   text-align: center;
 
@@ -130,19 +132,19 @@ const StartBtn = styled.button`
   font-family: 'Open Sans';
   font-style: normal;
   font-weight: bold;
-  font-size: 2.6rem;
+  font-size: 2.2rem;
   text-align: center;
 
   cursor: pointer;
 
   color: #ffffff;
-  width: 13rem;
-  height: 5rem;
+  width: 10rem;
+  height: 4rem;
   background: linear-gradient(88.75deg, #4a4bf8 0.73%, #ec58d4 102.47%);
   border-radius: 50em;
   border: 1px solid #2e3440;
 
-  margin-right: 2rem;
+  /* margin-right: 1rem; */
 
   transition: transform 250ms ease-in-out;
 
@@ -153,23 +155,74 @@ const StartBtn = styled.button`
   }
 `;
 
+const TabWrapper = styled.div`
+  position: relative;
+`;
+
 const StyledTab = styled.ul`
   list-style: none;
-  position: absolute;
+  width: 80%;
+  display: flex;
+  justify-content: flex-end;
+  margin-left: auto;
+  position: relative;
 
-  left: 5em;
-  top: 2em;
+  & > li:first-child {
+    margin-right: 0.5em;
+  }
+
+  & > li + li {
+    margin-right: 0.5em;
+  }
 
   li {
-    display: inline-block;
-    margin-right: 1em;
+    display: flex;
+    position: relative;
+    justify-content: center;
+
+    transition: transform 200ms ease-in;
+
+    ::before {
+      content: '';
+      display: inline-block;
+      width: 80%;
+      height: 1px;
+      margin: auto;
+      background: linear-gradient(88.75deg, #4a4bf8 0.73%, #ec58d4 102.47%);
+
+      position: absolute;
+      bottom: 0;
+    }
 
     button {
       cursor: pointer;
+      color: white;
+
+      padding: 0.2em 0.8em;
+
+      background: transparent;
+      outline: 0;
+      border: none;
+      /* border: none; */
+
+      /* background: linear-gradient(#0f0c1d, #0f0c1d) padding-box,
+        linear-gradient(88.75deg, #4a4bf8 0.73%, #ec58d4 102.47%) border-box;
+      border-radius: 50em;
+      border: 2px solid transparent; */
+      opacity: 0.6;
 
       :hover {
-        background: red;
+        background: transparent;
+        border-color: white;
+        /* color: #9b9c9a; */
+        opacity: 1;
+        /* transform: scale(1.1); */
       }
+    }
+
+    :hover {
+      /* color: #9b9c9a; */
+      transform: scale(1.1);
     }
   }
 `;

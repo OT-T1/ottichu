@@ -5,6 +5,7 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 export default function PreferenceChart({ categories }) {
   const [data, setData] = useState({ labels: [], datasets: [] });
+  const [topGenres, setTopGenres] = useState('');
 
   useEffect(() => {
     const labels = [];
@@ -14,6 +15,11 @@ export default function PreferenceChart({ categories }) {
     Object.keys(categories).map((category) =>
       percent.push(categories[category]),
     );
+
+    // percent가 max인 인덱스
+    const isLargeNumber = (element) => element === Math.max(...percent);
+    const index = percent.findIndex(isLargeNumber);
+    setTopGenres(labels[index]);
 
     const newData = {
       labels,
@@ -40,16 +46,28 @@ export default function PreferenceChart({ categories }) {
   const options = {
     maintainAspectRatio: false,
     plugins: {
+      legend: {
+        labels: {
+          color: '#ECEFF4',
+          usePointStyle: true,
+          padding: 10,
+          font: {
+            family: "'Inter', 'serif'",
+            lineHeight: 2,
+            size: 13,
+          },
+        },
+      },
       datalabels: {
         display: true,
         align: 'bottom',
-        // formatter(value) {
-        //   return `${value}%`;
-        // },
-        font: {
-          size: 18,
-          color: 'green',
+        formatter(value) {
+          return `${value}%`;
         },
+        font: {
+          size: 16,
+        },
+        color: '#2E3440',
       },
     },
   };
@@ -57,18 +75,17 @@ export default function PreferenceChart({ categories }) {
   const plugins = [ChartDataLabels];
 
   return (
-    <TestDiv>
-      <StyledTitle>{Object.keys(categories)[0]}를 가장 선호합니다</StyledTitle>
+    <ChartWrapper>
+      <StyledTitle>{topGenres}를 가장 선호합니다</StyledTitle>
       <StyledDiv>
         <Pie data={data} options={options} plugins={plugins} />
       </StyledDiv>
-    </TestDiv>
+    </ChartWrapper>
   );
 }
 
-const TestDiv = styled.div`
+const ChartWrapper = styled.div`
   text-align: center;
-  /* border: 2px solid red; */
 `;
 
 const StyledTitle = styled.h1`
@@ -77,7 +94,8 @@ const StyledTitle = styled.h1`
 
 const StyledDiv = styled.div`
   width: 40vw;
-  height: 36vh;
+  height: 50vh;
+  padding: 1em 1em;
   background: linear-gradient(
     126.6deg,
     rgba(255, 255, 255, 0.12) 28.69%,

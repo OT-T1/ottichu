@@ -7,6 +7,7 @@ import PreferenceChart from './preferenceChart';
 import api from '../../api';
 import KeywordCloud from './keywordCloud';
 import { selector } from '../../store/modules';
+import loadingWalk from '../../assets/images/loading_walk.gif';
 
 const ResultPage = () => {
   const [result, setResult] = useState(null);
@@ -34,7 +35,13 @@ const ResultPage = () => {
     fetchResults();
   }, [user]);
 
-  if (loading) return <div>Loading..</div>;
+  if (loading)
+    return (
+      <StyledLoadingImgWrapper>
+        <img src={loadingWalk} alt="loading" />
+        <StyledLoadingMessage>로딩중</StyledLoadingMessage>
+      </StyledLoadingImgWrapper>
+    );
   if (error) return <div>에러발생</div>;
   if (!result || !wordData) return null;
 
@@ -46,10 +53,22 @@ const ResultPage = () => {
         <KeywordCloud data={wordData} />
       </StyledVisualSection>
       <OttList result={result} />
-      <ContentsDiagram />
+      <ContentsDiagram data={result.diagram} />
     </PageWrapper>
   );
 };
+
+const StyledLoadingImgWrapper = styled.div`
+  background: #0f0c1d;
+  text-align: center;
+  padding: 0;
+  line-height: 100vh;
+  z-index: 50;
+`;
+
+const StyledLoadingMessage = styled.p`
+  color: white;
+`;
 
 const PageWrapper = styled.div`
   background: #0f0c1d;
@@ -57,14 +76,7 @@ const PageWrapper = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: white;
-`;
-
-const StyledVisualSection = styled.section`
-  border: 1px solid red;
-  width: 80%;
-  display: flex;
-  justify-content: space-evenly;
+  color: #eceff4;
 `;
 
 const StyledTitle = styled.span`
@@ -79,6 +91,12 @@ const StyledTitle = styled.span`
   font-size: 1.2em;
   line-height: 3em;
   color: #ffffff;
+`;
+
+const StyledVisualSection = styled.section`
+  width: 80%;
+  display: flex;
+  justify-content: space-evenly;
 `;
 
 export default ResultPage;
