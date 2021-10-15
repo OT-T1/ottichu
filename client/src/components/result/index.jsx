@@ -43,7 +43,7 @@ const ResultPage = () => {
       <StyledTitle>분석 결과</StyledTitle>
       <StyledVisualSection>
         <PreferenceChart categories={result.category} />
-        <KeywordCloud data={wordData.words} />
+        <KeywordCloud data={wordData} />
       </StyledVisualSection>
       <OttList result={result} />
       <ContentsDiagram />

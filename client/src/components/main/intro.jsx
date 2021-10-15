@@ -40,17 +40,16 @@ const StyledSection = styled.section`
 `;
 
 const StyledTitle = styled.h1`
-  border: 4px solid red;
-  width: 60rem;
-  height: 23rem;
+  width: 8em;
+  height: 2.6em;
 
   margin: 0;
+  margin-top: 0.3em;
 
   font-family: 'Karla';
   font-style: normal;
   font-weight: bold;
-  font-size: 9rem;
-  /* line-height: 12rem; */
+  font-size: 7em;
   text-align: center;
 
   color: #ffffff;
@@ -59,13 +58,10 @@ const StyledTitle = styled.h1`
 `;
 
 const StyledDescription = styled.p`
-  border: 4px solid red;
-
   font-family: 'Roboto';
   font-style: normal;
   font-weight: normal;
   font-size: 1.6rem;
-  /* line-height: 28px; */
   text-align: center;
 
   color: #fffdfd;
@@ -80,7 +76,6 @@ const StartBtn = styled.button`
   font-style: normal;
   font-weight: bold;
   font-size: 2.6rem;
-  /* line-height: 5rem; */
   text-align: center;
 
   cursor: pointer;
@@ -89,10 +84,18 @@ const StartBtn = styled.button`
   width: 13rem;
   height: 5rem;
   background: linear-gradient(88.75deg, #4a4bf8 0.73%, #ec58d4 102.47%);
-  border-radius: 50px;
-  border: 1px solid white;
+  border-radius: 50em;
+  border: 1px solid #2e3440;
 
   margin-right: 2rem;
+
+  transition: transform 250ms ease-in-out;
+
+  :hover {
+    transform: scale(1.1);
+    background: transparent;
+    border: 4px solid #e810b9;
+  }
 `;
 
 const MoreBtn = styled.button`

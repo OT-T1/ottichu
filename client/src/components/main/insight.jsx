@@ -81,7 +81,12 @@ export default function Insight({ handleStart }) {
     <StyledSection>
       <StyledTab>{tabContentsList.map((chart) => chart.tabTitle)}</StyledTab>
       {tabContentsList[activeTab].tabContent}
-      <StyledDescription>코로나 어쩌구 문구가 들어가야될듯</StyledDescription>
+      <StyledDescription>
+        <HighlightedText>OTT별 검색 횟수</HighlightedText>와 각 OTT의{' '}
+        <HighlightedText>연관검색어 1위</HighlightedText>를 확인해보실 수
+        있습니다! <br />
+        사용자들의 니즈가 다른 걸 볼 수 있죠?
+      </StyledDescription>
       <StartBtn type="button" onClick={handleStart}>
         Start
       </StartBtn>
@@ -100,17 +105,24 @@ const StyledSection = styled.section`
   flex-direction: column;
   align-items: center;
   justify-content: center;
+
+  position: relative;
 `;
 
 const StyledDescription = styled.p`
   font-family: Roboto;
   font-style: normal;
   font-weight: normal;
-  font-size: 24px;
+  font-size: 1.5em;
   line-height: 28px;
   text-align: center;
 
   color: #fffdfd;
+`;
+
+const HighlightedText = styled.span`
+  color: #514cf7;
+  font-weight: bold;
 `;
 
 const StartBtn = styled.button`
@@ -119,7 +131,6 @@ const StartBtn = styled.button`
   font-style: normal;
   font-weight: bold;
   font-size: 2.6rem;
-  /* line-height: 5rem; */
   text-align: center;
 
   cursor: pointer;
@@ -128,17 +139,37 @@ const StartBtn = styled.button`
   width: 13rem;
   height: 5rem;
   background: linear-gradient(88.75deg, #4a4bf8 0.73%, #ec58d4 102.47%);
-  border-radius: 50px;
-  border: 1px solid white;
+  border-radius: 50em;
+  border: 1px solid #2e3440;
 
   margin-right: 2rem;
+
+  transition: transform 250ms ease-in-out;
+
+  :hover {
+    transform: scale(1.1);
+    background: transparent;
+    border: 4px solid #e810b9;
+  }
 `;
 
 const StyledTab = styled.ul`
   list-style: none;
-  background: red;
+  position: absolute;
+
+  left: 5em;
+  top: 2em;
 
   li {
     display: inline-block;
+    margin-right: 1em;
+
+    button {
+      cursor: pointer;
+
+      :hover {
+        background: red;
+      }
+    }
   }
 `;
