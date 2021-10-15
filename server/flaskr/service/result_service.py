@@ -12,6 +12,7 @@ class Result:
         # 비슷한 상위 200개의 컨텐츠
         result_data = recom.get_result(user_data["contents"])
         # 장르
+        result_diagram = recom.get_diagram(result_data)
         top_genre = recom.get_top_genre(result_data)
         # ott추천정도
         top_platform = recom.get_ott_recommendation(result_data)
@@ -43,6 +44,7 @@ class Result:
                         reverse=True,
                     )
                 ),
+                diagram=result_diagram,
             ),
             200,
         )
