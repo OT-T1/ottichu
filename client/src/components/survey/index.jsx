@@ -13,8 +13,6 @@ import { handleLeave, handleScrollSlide } from '../../utils';
 import OttTerms from './ottTerms';
 import FavoriteContent from './favoriteContent';
 
-const STORE_DELAY = 20000;
-
 const SurveyPage = () => {
   const dispatch = useDispatch();
   const user = useSelector(selector.getUser);
@@ -52,15 +50,6 @@ const SurveyPage = () => {
     ],
     [],
   );
-
-  // 일정 주기로 로컬 스토리지에 작성 정보 저장
-  useEffect(() => {
-    dispatch(
-      actions.registerScheduler(
-        setInterval(() => dispatch(actions.storeSurveyRecord()), STORE_DELAY),
-      ),
-    );
-  }, [dispatch]);
 
   const movePreviousRecord = useCallback(
     (anchor) =>
