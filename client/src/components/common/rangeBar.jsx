@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled, { css } from 'styled-components';
 
 const RangeBar = ({
@@ -17,7 +17,6 @@ const RangeBar = ({
   value,
   onInput,
 }) => {
-  const [currentValue, setCurrentValue] = useState(0);
   const trackSize = useMemo(() => {
     const sizeUnit = /[a-z%]+/.exec(height)[0];
     const size = Number(height.replace(/[a-z%]/gi, ''));
@@ -32,7 +31,6 @@ const RangeBar = ({
 
   const handleInput = useCallback(
     (e) => {
-      setCurrentValue(e.target.value);
       if (typeof onInput === 'function') {
         onInput(e);
       }
@@ -68,7 +66,7 @@ const RangeBar = ({
           // onTouchEnd={handleMouseEnd}
         />
         <StyledValueRange id={`${id}--tickmarks`}>
-          <option value={min} label={`${currentValue}${unit}`} />
+          <option value={value} label={`${value}${unit}`} />
           <option value={max} label={`${max}${unit}`} />
         </StyledValueRange>
       </StyledRangeBar>

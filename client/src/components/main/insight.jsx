@@ -7,7 +7,7 @@ import TvingGraph from './tvingGraph';
 import NetflixGraph from './netflixGraph';
 import WhatchaGraph from './whatchaGraph';
 
-export default function Insight({ clickHandler }) {
+export default function Insight({ handleStart }) {
   const [activeTab, setActiveTab] = useState(0);
 
   const tabHandler = (index) => {
@@ -82,7 +82,7 @@ export default function Insight({ clickHandler }) {
       <StyledTab>{tabContentsList.map((chart) => chart.tabTitle)}</StyledTab>
       {tabContentsList[activeTab].tabContent}
       <StyledDescription>코로나 어쩌구 문구가 들어가야될듯</StyledDescription>
-      <StartBtn type="button" onClick={clickHandler}>
+      <StartBtn type="button" onClick={handleStart}>
         Start
       </StartBtn>
     </StyledSection>

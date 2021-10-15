@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import styled, { css } from 'styled-components';
 
-const StyledBtn = ({ type, text, onClick, onSubmit, colorType }) => {
+const StyledBtn = ({ type, text, onClick, onSubmit, hidden, colorType }) => {
   const handleSubmit = useCallback(
     (e) => {
       e.preventDefault();
@@ -17,6 +17,7 @@ const StyledBtn = ({ type, text, onClick, onSubmit, colorType }) => {
       type={type}
       onClick={onClick}
       onSubmit={handleSubmit}
+      hidden={hidden}
       colorType={colorType}
     >
       {text}
@@ -25,6 +26,11 @@ const StyledBtn = ({ type, text, onClick, onSubmit, colorType }) => {
 };
 
 const StyledButton = styled.button`
+  ${(props) =>
+    props.hidden &&
+    css`
+      display: none;
+    `};
   min-width: 120px;
   padding: 0.7rem 1.2rem;
   border-radius: 40px;
@@ -33,15 +39,16 @@ const StyledButton = styled.button`
   border: none;
   outline: 0;
   color: white;
+  border: solid 2px white;
+  transition: all 0.3s ease-in;
 
   ${(props) =>
     props.colorType === 'stylish'
       ? css`
-          background: linear-gradient(#4a4bf8, #ec58d4);
+          background: linear-gradient(88.75deg, #4a4bf8 0.73%, #ec58d4 102.47%);
           :hover {
-            // 임시
             background: transparent;
-            border: solid 2px white;
+            transform: scale(1.1);
           }
         `
       : css`

@@ -53,7 +53,6 @@ const PreferenceType = ({ fullpageApi }) => {
 
   const handleDeleteAD = useCallback(
     (e) => {
-      console.log(e.target);
       dispatch(
         actions.deleteActorDirector({
           type: e.target.dataset.type,
@@ -226,6 +225,10 @@ const StyledSelectedListWrapper = styled.ul`
     margin-top: 0.7rem;
     cursor: pointer;
     opacity: 0.7;
+
+    & > svg {
+      pointer-events: none;
+    }
 
     :hover {
       opacity: 1;

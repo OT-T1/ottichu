@@ -60,14 +60,11 @@ function* createSubmitData() {
 function* submitBasicInfo() {
   try {
     const submitData = yield createSubmitData();
-    console.log('제출할 형식: ', submitData);
     // 사용자 기본 정보 제출
     const response = yield call(api.submitBasicInfo, submitData);
     yield put(surveyActions.resSubmitBasic(reducerState.success(true)));
     // 응답받은 사용자 코드 등록
     yield put(userActions.registerUserCode(response.user_code));
-    // 사용자 성향에 맞는 컨텐츠 정보 요청
-    yield put(contentActions.reqContentInfo(response.user_code));
   } catch (e) {
     yield put(surveyActions.resSubmitBasic(reducerState.failure(e)));
   }
@@ -76,16 +73,10 @@ function* submitBasicInfo() {
 function* submitContent(action) {
   try {
     const { result } = action.payload;
-    console.log('제추우우우우울 스타트', result);
     const user = yield select(userSelector.getUser);
     const submitData = yield select(contentSelector.getSelectedContent);
-    console.log('제출 컨텐츠', user, submitData);
-    const response = yield call(api.submitContent, {
-      user_code: user,
-      contents: submitData,
-    });
-    console.log('컨텐츠 제출 응답', response);
-    yield put(surveyActions.resSubmitContent(reducerState.success(true)));
+    yield call(api.submitContent, { user_code: user, contents: submitData });
+    yield put(surveyActions.resSubmitContent(reducerState.success()));
     if (!result) {
       yield put(contentActions.reqContentInfo(user));
     } else {
